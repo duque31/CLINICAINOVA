@@ -1,0 +1,903 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>INOVA – Portal Administrativo</title>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    /* === VARIÁVEIS GLOBAIS E TEMA === */
+    :root {
+      --bg-color: #ffffff;
+      --surface-color: #f8fafc;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --primary: #4f46e5;
+      --primary-hover: #4338ca;
+      --border-color: #e2e8f0;
+      --focus-ring: rgba(79, 70, 229, 0.4);
+      --success: #10b981;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --font-scale: 100%;
+    }
+
+    body.high-contrast {
+      --bg-color: #000000;
+      --surface-color: #121212;
+      --text-main: #ffffff;
+      --text-muted: #a1a1aa;
+      --primary: #818cf8;
+      --primary-hover: #a5b4fc;
+      --border-color: #27272a;
+      --focus-ring: rgba(129, 140, 248, 0.8);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: system-ui, -apple-system, sans-serif;
+    }
+
+    html {
+      font-size: var(--font-scale);
+      transition: font-size 0.3s ease;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      line-height: 1.5;
+      transition: background-color 0.3s, color 0.3s;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    button {
+      cursor: pointer;
+      border: none;
+      background: none;
+      font-family: inherit;
+      color: inherit;
+    }
+
+    input:focus,
+    button:focus,
+    select:focus {
+      outline: 3px solid var(--focus-ring);
+      outline-offset: 2px;
+    }
+
+    .container {
+      max-width: 1300px;
+      margin: 0 auto;
+      padding: 0 24px;
+      width: 100%;
+    }
+
+    /* === HEADER === */
+    header {
+      border-bottom: 1px solid var(--border-color);
+      background-color: var(--bg-color);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .header-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      height: 72px;
+    }
+
+    .logo {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: var(--primary);
+    }
+
+    .header-nav {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .btn-solid {
+      background-color: var(--primary);
+      color: #fff;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: background-color 0.2s;
+    }
+
+    .btn-solid:hover {
+      background-color: var(--primary-hover);
+    }
+
+    .btn-ghost {
+      padding: 10px 16px;
+      font-weight: 600;
+      color: var(--text-muted);
+      border-radius: 8px;
+      transition: background-color 0.2s, color 0.2s;
+    }
+
+    .btn-ghost:hover {
+      background-color: var(--surface-color);
+      color: var(--text-main);
+    }
+
+    /* === LAYOUT ADMIN === */
+    .admin-layout {
+      display: flex;
+      gap: 32px;
+      padding: 40px 0;
+      flex: 1;
+    }
+
+    .sidebar-nav {
+      width: 250px;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .nav-item {
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-weight: 600;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transition: background-color 0.2s, color 0.2s;
+    }
+
+    .nav-item:hover {
+      background-color: var(--surface-color);
+      color: var(--text-main);
+    }
+
+    .nav-item.active {
+      background-color: rgba(79, 70, 229, 0.1);
+      color: var(--primary);
+    }
+
+    .main-content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .view-section {
+      display: none;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .view-section.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(5px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .page-header {
+      margin-bottom: 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .page-header h1 {
+      font-size: 1.8rem;
+      margin-bottom: 4px;
+    }
+
+    .page-header p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+    }
+
+    /* === DASHBOARD CARDS === */
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 24px;
+      margin-bottom: 40px;
+    }
+
+    .stat-card {
+      background-color: var(--bg-color);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 24px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
+    }
+
+    .stat-icon {
+      width: 56px;
+      height: 56px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+    }
+
+    .stat-info h3 {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      font-weight: 600;
+      margin-bottom: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .stat-info p {
+      font-size: 1.8rem;
+      font-weight: 800;
+      line-height: 1;
+    }
+
+    /* === TABELAS DE DADOS === */
+    .data-table-wrapper {
+      background-color: var(--bg-color);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      overflow-x: auto;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
+      position: relative;
+      min-height: 200px;
+    }
+
+    /* Overlay de Carregamento (Loading UX) */
+    .loading-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(255, 255, 255, 0.8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+      font-weight: 600;
+      color: var(--primary);
+      display: none;
+      backdrop-filter: blur(2px);
+      border-radius: 12px;
+    }
+
+    body.high-contrast .loading-overlay {
+      background: rgba(0, 0, 0, 0.8);
+    }
+
+    .loading-overlay.active {
+      display: flex;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+
+    th {
+      background-color: var(--surface-color);
+      padding: 16px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border-color);
+      white-space: nowrap;
+    }
+
+    td {
+      padding: 16px;
+      border-bottom: 1px solid var(--border-color);
+      font-size: 0.95rem;
+    }
+
+    tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    tbody tr:hover {
+      background-color: var(--surface-color);
+    }
+
+    .badge {
+      padding: 4px 10px;
+      border-radius: 99px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .badge-admin {
+      background-color: rgba(79, 70, 229, 0.1);
+      color: var(--primary);
+    }
+
+    .badge-medic {
+      background-color: rgba(16, 185, 129, 0.1);
+      color: var(--success);
+    }
+
+    .badge-paciente {
+      background-color: rgba(100, 116, 139, 0.1);
+      color: var(--text-muted);
+    }
+
+    /* === ACESSIBILIDADE FAB === */
+    .accessibility-fab {
+      position: fixed;
+      right: 24px;
+      bottom: 24px;
+      width: 56px;
+      height: 56px;
+      background-color: var(--primary);
+      color: #fff;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      box-shadow: 0 10px 25px rgba(79, 70, 229, 0.4);
+      z-index: 100;
+    }
+
+    /* === MODAIS NATIVOS === */
+    dialog {
+      margin: auto;
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 24px;
+      background: var(--bg-color);
+      color: var(--text-main);
+      width: 100%;
+      max-width: 400px;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    }
+
+    dialog::backdrop {
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(3px);
+    }
+
+    .dialog-header {
+      margin-bottom: 16px;
+      font-size: 1.25rem;
+      font-weight: 700;
+    }
+
+    .dialog-body input {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 16px;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      background: var(--surface-color);
+      color: var(--text-main);
+    }
+
+    .dialog-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    @media (max-width: 768px) {
+      .admin-layout {
+        flex-direction: column;
+      }
+
+      .sidebar-nav {
+        width: 100%;
+        flex-direction: row;
+        overflow-x: auto;
+        padding-bottom: 8px;
+      }
+
+      .nav-item {
+        white-space: nowrap;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <header>
+    <div class="container header-content">
+      <a href="index.html" class="logo"><i class="fa-solid fa-shield-halved"></i> INOVA | Admin</a>
+      <div class="header-nav">
+        <span id="user-greeting" style="font-weight: 600; color: var(--text-muted);">Olá, Administrador</span>
+        <button class="btn-ghost" style="color: var(--danger);" onclick="App.logout()">
+          <i class="fa-solid fa-right-from-bracket"></i> Sair
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container admin-layout">
+
+    <aside class="sidebar-nav">
+      <button class="nav-item active" data-target="view-dashboard" onclick="App.UI.changeTab(this)"><i
+          class="fa-solid fa-chart-pie"></i> Dashboard</button>
+      <button class="nav-item" data-target="view-usuarios" onclick="App.UI.changeTab(this)"><i
+          class="fa-solid fa-users-gear"></i> Gestão de Utilizadores</button>
+      <button class="nav-item" data-target="view-servicos" onclick="App.UI.changeTab(this)"><i
+          class="fa-solid fa-notes-medical"></i> Serviços e Especialidades</button>
+    </aside>
+
+    <section class="main-content">
+
+      <!-- VIEW: DASHBOARD -->
+      <!-- VIEW: DASHBOARD -->
+      <div id="view-dashboard" class="view-section active">
+        <div class="page-header">
+          <div>
+            <h1>Visão Geral</h1>
+            <p>Métricas de agendamentos e operações da clínica.</p>
+          </div>
+        </div>
+
+        <div class="stat-grid">
+          <div class="stat-card">
+            <div class="stat-icon" style="background: rgba(79, 70, 229, 0.1); color: var(--primary);"><i
+                class="fa-solid fa-calendar-check"></i></div>
+            <div class="stat-info">
+              <h3>Total Agendamentos</h3>
+              <p id="count-total">0</p>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background: rgba(16, 185, 129, 0.1); color: var(--success);"><i
+                class="fa-solid fa-check-double"></i></div>
+            <div class="stat-info">
+              <h3>Atendimentos Concluídos</h3>
+              <p id="count-concluidos">0</p>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background: rgba(239, 68, 68, 0.1); color: var(--danger);"><i
+                class="fa-solid fa-ban"></i></div>
+            <div class="stat-info">
+              <h3>Cancelamentos</h3>
+              <p id="count-cancelados">0</p>
+            </div>
+          </div>
+        </div>
+
+        <h2 style="font-size: 1.2rem; margin-bottom: 16px;">Últimas Atividades (Agendamentos)</h2>
+        <div class="data-table-wrapper">
+          <div id="loading-dashboard" class="loading-overlay"><i class="fa-solid fa-spinner fa-spin"
+              style="margin-right: 8px;"></i> Sincronizando...</div>
+          <table>
+            <thead>
+              <tr>
+                <th>Data da Consulta</th>
+                <th>Especialidade</th>
+                <th>Profissional</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="tabela-dashboard">
+              <!-- Renderizado via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+      </div>
+      <h2 style="font-size: 1.2rem; margin-bottom: 16px;">Últimas Atividades</h2>
+      <div class="data-table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Data</th>
+              <th>Ação</th>
+              <th>Utilizador</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>20/04/2026</td>
+              <td>Novo Cadastro (Paciente)</td>
+              <td>João Silva</td>
+              <td><span class="badge badge-medic">Sucesso</span></td>
+            </tr>
+            <tr>
+              <td>20/04/2026</td>
+              <td>Cancelamento de Consulta</td>
+              <td>Maria Costa</td>
+              <td><span class="badge" style="background:rgba(239,68,68,0.1);color:var(--danger)">Alerta</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      </div>
+
+      <!-- VIEW: USUÁRIOS -->
+      <div id="view-usuarios" class="view-section">
+        <div class="page-header">
+          <div>
+            <h1>Utilizadores do Sistema</h1>
+            <p>Gerencie permissões, adicione ou remova acessos.</p>
+          </div>
+        </div>
+
+        <div class="data-table-wrapper">
+          <div id="loading-usuarios" class="loading-overlay"><i class="fa-solid fa-spinner fa-spin"
+              style="margin-right: 8px;"></i> Carregando dados...</div>
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Nome</th>
+                <th>E-mail</th>
+                <th>Perfil</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody id="tabela-usuarios">
+              <!-- Renderizado via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- VIEW: SERVIÇOS -->
+      <div id="view-servicos" class="view-section">
+        <div class="page-header">
+          <div>
+            <h1>Serviços Clínicos</h1>
+            <p>Especialidades oferecidas para agendamento.</p>
+          </div>
+
+        </div>
+
+        <div class="data-table-wrapper">
+          <div id="loading-servicos" class="loading-overlay"><i class="fa-solid fa-spinner fa-spin"
+              style="margin-right: 8px;"></i> Carregando dados...</div>
+          <table>
+            <thead>
+              <tr>
+                <th>ID Serviço</th>
+                <th>Descrição</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody id="tabela-servicos">
+              <!-- Renderizado via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </section>
+  </main>
+
+  <button id="fab-a11y" class="accessibility-fab" onclick="document.body.classList.toggle('high-contrast')"
+    title="Alternar Alto Contraste">
+    <i class="fa-solid fa-universal-access"></i>
+  </button>
+
+  <!-- MODAL USUARIO -->
+  <dialog id="modal-usuario">
+    <div class="dialog-header">Adicionar Utilizador</div>
+    <div class="dialog-body">
+      <input type="text" id="input-nome" placeholder="Nome Completo">
+      <input type="email" id="input-email" placeholder="E-mail">
+    </div>
+    <div class="dialog-footer">
+      <button class="btn-ghost" onclick="document.getElementById('modal-usuario').close()">Cancelar</button>
+      <button class="btn-solid" onclick="App.actions.salvarUsuario()">Salvar</button>
+    </div>
+  </dialog>
+
+  <!-- MODAL SERVIÇO -->
+  <dialog id="modal-servico">
+    <div class="dialog-header">Adicionar Serviço</div>
+    <div class="dialog-body">
+      <input type="text" id="input-servico-descricao" placeholder="Descrição do Serviço (Ex: Cardiologia)">
+    </div>
+    <div class="dialog-footer">
+      <button class="btn-ghost" onclick="document.getElementById('modal-servico').close()">Cancelar</button>
+      <button class="btn-solid" onclick="App.actions.salvarServico()">Salvar</button>
+    </div>
+  </dialog>
+
+  <script>
+    // =========================================================================
+    // 1. CONFIGURAÇÃO DE ENDPOINTS
+    // =========================================================================
+    const API_BASE_URL = 'http://localhost:5017/api';
+
+    const ENDPOINTS = {
+      usuariosListar: `${API_BASE_URL}/Usuario`,
+      usuariosCriar: `${API_BASE_URL}/Auth/cadastro`,
+      usuariosDeletar: (id) => `${API_BASE_URL}/Usuario/${id}`,
+      servicosListar: `${API_BASE_URL}/Servico`,
+      servicosCriar: `${API_BASE_URL}/Servico`,
+      agendamentosListar: `${API_BASE_URL}/agendamento` // NOVO ENDPOINT DE AGENDAMENTOS
+    };
+
+    const mocks = {
+      usuarios: [
+        { id: 1, nome: "Admin Principal", email: "admin@inova.pt", perfil: "Admin" },
+        { id: 101, nome: "Dr. Roberto Mendes", email: "roberto@inova.pt", perfil: "Profissional" },
+        { id: 305, nome: "Dra. Amanda Silva", email: "amanda@inova.pt", perfil: "Profissional" }
+      ],
+      servicos: [
+        { id: 1, descricao: "Fisioterapia" },
+        { id: 2, descricao: "Fonoaudiologia" },
+        { id: 3, descricao: "Terapia Ocupacional" },
+        { id: 4, descricao: "Psicologia" }
+      ]
+    };
+    // =========================================================================
+    // 2. ARQUITETURA DA APLICAÇÃO (Lógica de Negócio)
+    // =========================================================================
+    const App = {
+      data: { usuarios: [], servicos: [], agendamentos: [] },
+
+      async init() {
+        // Dispara todas as buscas em paralelo para performance
+        await Promise.all([
+          this.services.fetchUsuarios(),
+          this.services.fetchServicos(),
+          this.services.fetchAgendamentos() // NOVA CHAMADA
+        ]);
+      },
+
+      services: {
+        async fetchUsuarios() {
+          App.UI.toggleLoading('loading-usuarios', true);
+          try {
+            const response = await fetch(ENDPOINTS.usuariosListar);
+            if (!response.ok) throw new Error('Falha na API');
+            App.data.usuarios = await response.json();
+          } catch (error) {
+            console.warn("API Offline. Usando dados Mock para Usuários.");
+            App.data.usuarios = mocks.usuarios;
+          } finally {
+            App.UI.renderUsuarios();
+            App.UI.toggleLoading('loading-usuarios', false);
+          }
+        },
+
+        async fetchServicos() {
+          App.UI.toggleLoading('loading-servicos', true);
+          try {
+            const response = await fetch(ENDPOINTS.servicosListar);
+            if (!response.ok) throw new Error('Falha na API');
+            App.data.servicos = await response.json();
+          } catch (error) {
+            console.warn("API Offline. Usando dados Mock para Serviços.");
+            App.data.servicos = mocks.servicos;
+          } finally {
+            App.UI.renderServicos();
+            App.UI.toggleLoading('loading-servicos', false);
+          }
+        },
+
+        // NOVO SERVIÇO: Busca agendamentos reais
+        async fetchAgendamentos() {
+          App.UI.toggleLoading('loading-dashboard', true);
+          try {
+            const response = await fetch(ENDPOINTS.agendamentosListar);
+            if (!response.ok) throw new Error('Falha na API');
+            App.data.agendamentos = await response.json();
+          } catch (error) {
+            console.warn("API de Agendamentos Offline. Lendo do LocalStorage do navegador...");
+            // Comunicação via Storage: Lê o que o marcar_consulta.html salvou
+            const agendamentosLocais = JSON.parse(localStorage.getItem('inova_agendamentos') || '[]');
+            App.data.agendamentos = agendamentosLocais;
+          } finally {
+            App.UI.renderDashboard();
+            App.UI.toggleLoading('loading-dashboard', false);
+          }
+        }
+      },
+
+      actions: {
+        async salvarUsuario() {
+          const nome = document.getElementById('input-nome').value.trim();
+          const email = document.getElementById('input-email').value.trim();
+          if (!nome || !email) return alert("Preencha todos os campos!");
+
+          // Payload alinhado com Paciente.cs herdando Usuario.cs (PascalCase)
+          const payload = {
+            Nome: nome,
+            Email: email,
+            Senha: "Inova@2026",          // Senha temporária
+            Perfil: "Paciente",
+            Cpf: "00000000000",           // Campo obrigatório provisório
+            Telefone: "00000000000",
+            DataNascimento: "1990-01-01T00:00:00"
+          };
+
+          try {
+            const res = await fetch(ENDPOINTS.usuariosCriar, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(payload)
+            });
+            if (!res.ok) {
+              const err = await res.text();
+              throw new Error(err);
+            }
+            alert("Usuário cadastrado com sucesso!");
+            document.getElementById('modal-usuario').close();
+            App.services.fetchUsuarios();
+          } catch (e) {
+            alert("Erro: " + e.message);
+          }
+        },
+        async deletarUsuario(id) {
+          if (!confirm(`Tem certeza que deseja excluir o usuário #${id}?`)) return;
+          try {
+            await fetch(ENDPOINTS.usuariosDeletar(id), { method: 'DELETE' });
+            App.data.usuarios = App.data.usuarios.filter(u => u.id !== id);
+            App.UI.renderUsuarios();
+          } catch (e) {
+            alert("Erro ao excluir no banco de dados.");
+          }
+        },
+
+        salvarServico() {
+          const descricao = document.getElementById('input-servico-descricao').value;
+          if (!descricao) return alert("Preencha a descrição do serviço.");
+
+          const payload = { descricao };
+
+          fetch(ENDPOINTS.servicosCriar, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          })
+            .then(res => {
+              if (!res.ok) throw new Error('Erro ao salvar');
+              return res.json();
+            })
+            .then(data => {
+              alert("Serviço cadastrado com sucesso!");
+              document.getElementById('modal-servico').close();
+              App.services.fetchServicos();
+            })
+            .catch(e => {
+              alert("Erro: " + e.message);
+            });
+        }
+      },
+
+      UI: {
+        changeTab(btn) {
+          document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active'));
+          document.getElementById(btn.dataset.target).classList.add('active');
+        },
+
+        toggleLoading(elementId, show) {
+          const el = document.getElementById(elementId);
+          if (el) show ? el.classList.add('active') : el.classList.remove('active');
+        },
+
+        // NOVA RENDERIZAÇÃO: Constrói a tela de Dashboard com dados reais
+        renderDashboard() {
+          const tbody = document.getElementById('tabela-dashboard');
+          const dados = App.data.agendamentos;
+
+          // Atualiza os contadores no topo
+          document.getElementById('count-total').innerText = dados.length;
+          document.getElementById('count-concluidos').innerText = dados.filter(a => a.Status === 'Concluído').length || 0;
+          document.getElementById('count-cancelados').innerText = dados.filter(a => a.Status === 'Cancelado').length || 0;
+
+          // Se não houver dados, avisa o usuário
+          if (dados.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:var(--text-muted);">Nenhum agendamento registrado no sistema.</td></tr>`;
+            return;
+          }
+
+          // Renderiza as linhas
+          tbody.innerHTML = dados.reverse().map(a => {
+            // Formata a data (Lida tanto com o formato do C# quanto do LocalStorage)
+            let dataFormatada = a.Dia ? `${a.Dia}/${a.Mes}/${a.Ano} às ${a.Hora}` : new Date(a.DataHora).toLocaleString('pt-BR');
+            let especialidade = a.Especialidade || `Serviço ID: ${a.ServicoId}`;
+            let profissional = a.Medico || `Profissional ID: ${a.ProfissionalId}`;
+
+            // Define a cor da badge de status
+            let badgeColor = 'badge-paciente'; // Padrão
+            if (a.Status === 'Confirmado' || a.Status === 'Concluído') badgeColor = 'badge-medic';
+            if (a.Status === 'Cancelado') badgeColor = 'badge-admin'; // Usando admin-color para alerta visual
+
+            return `<tr>
+              <td style="font-weight: 600;">${dataFormatada}</td>
+              <td>${especialidade}</td>
+              <td>${profissional}</td>
+              <td><span class="badge ${badgeColor}">${a.Status || 'Pendente'}</span></td>
+            </tr>`;
+          }).join('');
+        },
+
+        renderUsuarios() {
+          const tbody = document.getElementById('tabela-usuarios');
+          tbody.innerHTML = App.data.usuarios.map(u => {
+            // A API retorna PascalCase (Id, Nome, Email, Perfil)
+            const id = u.Id ?? u.id;
+            const nome = u.Nome ?? u.nome;
+            const email = u.Email ?? u.email;
+            const perfil = u.Perfil ?? u.perfil ?? 'Paciente';
+            let badge = perfil === 'Admin' ? 'badge-admin' : perfil === 'Profissional' ? 'badge-medic' : 'badge-paciente';
+            return `<tr>
+              <td>#${id}</td>
+              <td style="font-weight: 600;">${nome}</td>
+              <td>${email}</td>
+              <td><span class="badge ${badge}">${perfil}</span></td>
+              <td>
+                <button class="btn-ghost" style="padding: 6px; color: var(--danger);" onclick="App.actions.deletarUsuario(${id})"><i class="fa-solid fa-trash"></i></button>
+              </td>
+            </tr>`;
+          }).join('');
+        },
+
+        renderServicos() {
+          const tbody = document.getElementById('tabela-servicos');
+          tbody.innerHTML = App.data.servicos.map(s => {
+            // A API retorna PascalCase (Id, Descricao)
+            const id = s.Id ?? s.id;
+            const descricao = s.Descricao ?? s.descricao;
+            return `<tr>
+              <td>#${id}</td>
+              <td style="font-weight: 600;">${descricao}</td>
+              <td><button class="btn-ghost" style="padding: 6px;"><i class="fa-solid fa-pen-to-square"></i></button></td>
+            </tr>`;
+          }).join('');
+        }
+      },
+
+      logout() {
+        localStorage.removeItem('inova_userName');
+        localStorage.removeItem('inova_userId');
+        localStorage.removeItem('inova_userRole');
+        localStorage.removeItem('inova_userPerfil');
+        window.location.href = 'index.html';
+      }
+    };
+
+    document.addEventListener('DOMContentLoaded', () => App.init());
+  </script>
+</body>
+
+</html>

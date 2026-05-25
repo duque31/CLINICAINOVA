@@ -1,0 +1,361 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>INOVA – Portal do Profissional</title>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    /* === VARIÁVEIS GLOBAIS E TEMA === */
+    :root {
+      --bg-color: #ffffff;
+      --surface-color: #f5f5f5;
+      --text-main: #171717;
+      --text-muted: #525252;
+      --primary: #0d9488;
+      --primary-hover: #0f766e;
+      --border-color: #e5e5e5;
+      --focus-ring: rgba(13, 148, 136, 0.4);
+      --success: #10b981;
+      --danger: #ef4444;
+      --font-scale: 100%;
+    }
+
+    body.high-contrast {
+      --bg-color: #121212;
+      --surface-color: #1e1e1e;
+      --text-main: #ffffff;
+      --text-muted: #a3a3a3;
+      --primary: #2dd4bf;
+      --primary-hover: #5eead4;
+      --border-color: #404040;
+      --focus-ring: rgba(45, 212, 191, 0.8);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: system-ui, -apple-system, sans-serif;
+    }
+
+    html {
+      font-size: var(--font-scale);
+      transition: font-size 0.3s ease;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      line-height: 1.5;
+      transition: background-color 0.3s, color 0.3s;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    button {
+      cursor: pointer;
+      border: none;
+      background: none;
+      font-family: inherit;
+      color: inherit;
+    }
+
+    button:focus {
+      outline: 3px solid var(--focus-ring);
+      outline-offset: 2px;
+    }
+
+    .container {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 0 24px;
+      width: 100%;
+    }
+
+    /* HEADER */
+    header {
+      border-bottom: 1px solid var(--border-color);
+      background-color: var(--bg-color);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .header-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      height: 80px;
+    }
+
+    .logo {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: var(--primary);
+      text-decoration: none;
+    }
+
+    .user-menu {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .user-greeting {
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .btn-logout {
+      color: var(--danger);
+      font-weight: 600;
+      padding: 8px 16px;
+      border-radius: 8px;
+      transition: background 0.2s;
+    }
+
+    .btn-logout:hover {
+      background-color: rgba(239, 68, 68, 0.05);
+    }
+
+    /* MAIN CONTENT */
+    .dashboard-layout {
+      padding: 48px 0;
+      flex: 1;
+    }
+
+    .page-header {
+      margin-bottom: 32px;
+    }
+
+    .page-header h1 {
+      font-size: 2.25rem;
+      margin-bottom: 8px;
+    }
+
+    .page-header p {
+      color: var(--text-muted);
+    }
+
+    /* CARD METRICS */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 24px;
+      margin-bottom: 40px;
+    }
+
+    .metric-card {
+      background-color: var(--surface-color);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 24px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .metric-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      background-color: rgba(13, 148, 136, 0.1);
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+    }
+
+    .metric-info h3 {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .metric-info p {
+      font-size: 1.75rem;
+      font-weight: bold;
+    }
+
+    /* TABLES */
+    .table-wrapper {
+      background-color: var(--bg-color);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      overflow-x: auto;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+
+    th {
+      background-color: var(--surface-color);
+      padding: 16px;
+      font-size: 0.875rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    td {
+      padding: 16px;
+      border-bottom: 1px solid var(--border-color);
+      font-size: 0.95rem;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    .accessibility-fab {
+      position: fixed;
+      right: 24px;
+      bottom: 24px;
+      width: 56px;
+      height: 56px;
+      background-color: var(--primary);
+      color: #fff;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      box-shadow: 0 10px 25px rgba(13, 148, 136, 0.4);
+      z-index: 100;
+    }
+  </style>
+</head>
+
+<body>
+
+  <header>
+    <div class="container header-content">
+      <a href="index.html" class="logo">INOVA</a>
+      <div class="user-menu">
+        <span id="user-greeting" class="user-greeting">Olá, Profissional</span>
+        <button class="btn-logout" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i> Sair</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container dashboard-layout">
+    <div class="page-header">
+      <h1>Agenda do Especialista</h1>
+      <p>Gerenciamento de consultas e escala de pacientes vinculados ao seu perfil.</p>
+    </div>
+
+    <div class="metrics-grid">
+      <div class="metric-card">
+        <div class="metric-icon"><i class="fa-solid fa-calendar-day"></i></div>
+        <div class="metric-info">
+          <h3>Consultas Vinculadas</h3>
+          <p id="total-consultas">0</p>
+        </div>
+      </div>
+    </div>
+
+    <h2 style="font-size: 1.25rem; margin-bottom: 16px;">Lista de Pacientes Agendados</h2>
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Data e Hora</th>
+            <th>Especialidade / Serviço</th>
+            <th>Nome do Paciente</th>
+            <th>Necessita LIBRAS</th>
+            <th>Status da Consulta</th>
+          </tr>
+        </thead>
+        <tbody id="tabela-consultas-medico">
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+  <button id="fab-a11y" class="accessibility-fab" onclick="document.body.classList.toggle('high-contrast')"
+    title="Alternar Alto Contraste">
+    <i class="fa-solid fa-universal-access"></i>
+  </button>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // 1. VERIFICAÇÃO DE SEGURANÇA: Captura os dados do médico logado na sessão
+      const nomeMedicoLogado = localStorage.getItem('inova_userName');
+      const perfilUsuario = localStorage.getItem('inova_userRole');
+
+      // Proteção de rota básica contra acessos indevidos
+      if (!nomeMedicoLogado || perfilUsuario !== 'profissional') {
+        alert("Acesso restrito! Por favor, faça login como profissional de saúde.");
+        window.location.href = 'login.html';
+        return;
+      }
+
+      // Atualiza as saudações textuais na interface se os elementos existirem
+      const greetingEl = document.getElementById('user-greeting');
+      if (greetingEl) greetingEl.textContent = `Olá, ${nomeMedicoLogado}`;
+
+      // 2. SINCRONIZAÇÃO DE DADOS: Recupera e filtra os agendamentos realizados
+      try {
+        // Busca a lista global salva pelo arquivo marcar_consulta.html
+        const todosAgendamentos = JSON.parse(localStorage.getItem('inova_agendamentos') || '[]');
+
+        // Filtra mantendo apenas os pacientes que marcaram consulta especificamente com ESTE médico
+        const meusPacientes = todosAgendamentos.filter(agendamento => {
+          return agendamento.Medico && agendamento.Medico.trim().toLowerCase() === nomeMedicoLogado.trim().toLowerCase();
+        });
+
+        // Atualiza o contador de métricas na tela
+        const contadorEl = document.getElementById('total-consultas');
+        if (contadorEl) contadorEl.textContent = meusPacientes.length;
+
+        // Seleciona o corpo da tabela de listagem na página
+        const tbody = document.getElementById('tabela-consultas-medico');
+        if (!tbody) return;
+
+        if (meusPacientes.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#64748b; padding: 24px;">Nenhum paciente agendado para o seu perfil até o momento.</td></tr>`;
+          return;
+        }
+
+        // Renderiza os registros encontrados de forma cronológica inversa (mais recentes primeiro)
+        tbody.innerHTML = meusPacientes.reverse().map(a => {
+          let dataFormatada = a.Dia ? `${a.Dia}/${a.Mes}/${a.Ano} às ${a.Hora}` : 'Data não informada';
+
+          return `
+            <tr>
+              <td style="font-weight: 600; padding: 12px;">${dataFormatada}</td>
+              <td style="padding: 12px;">${a.Especialidade || 'Consulta Médica'}</td>
+              <td style="padding: 12px; font-weight: 600;">Paciente Identificado</td>
+              <td style="padding: 12px;">${a.RequerLibras ? '<span class="badge" style="background:rgba(13,148,136,0.1); color:#0d9488; padding:4px 8px; border-radius:4px; font-size:0.8rem; font-weight:bold;">Sim (LIBRAS)</span>' : 'Não'}</td>
+              <td style="padding: 12px;"><span class="badge-status" style="color:#10b981; font-weight:bold;">${a.Status || 'Confirmado'}</span></td>
+            </tr>
+          `;
+        }).join('');
+
+      } catch (error) {
+        console.error("Erro crítico ao processar sincronização local:", error);
+      }
+    });
+
+    function logout() {
+      localStorage.removeItem('inova_userName');
+      localStorage.removeItem('inova_userId');
+      localStorage.removeItem('inova_userRole');
+      localStorage.removeItem('inova_userPerfil');
+      window.location.href = 'login.html';
+    }
+  </script>
+</body>
+
+</html>

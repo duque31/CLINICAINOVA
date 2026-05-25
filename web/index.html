@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>INOVA - Sistema Clínica Renova</title>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    /* === VARIÁVEIS GLOBAIS E TEMA === */
+    :root {
+      --bg-color: #ffffff;
+      --surface-color: #f5f5f5;
+      --text-main: #171717;
+      --text-muted: #525252;
+      --primary: #0d9488;
+      --primary-hover: #0f766e;
+      --border-color: #e5e5e5;
+      --font-scale: 100%;
+    }
+
+    body.high-contrast {
+      --bg-color: #121212;
+      --surface-color: #1e1e1e;
+      --text-main: #ffffff;
+      --text-muted: #a3a3a3;
+      --primary: #2dd4bf;
+      --primary-hover: #5eead4;
+      --border-color: #404040;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: system-ui, -apple-system, sans-serif;
+    }
+
+    html {
+      font-size: var(--font-scale);
+      transition: font-size 0.3s ease;
+      scroll-behavior: smooth;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      line-height: 1.5;
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    a {
+      text-decoration: none;
+      color: inherit;
+    }
+
+    button {
+      cursor: pointer;
+      border: none;
+      background: none;
+      font-family: inherit;
+    }
+
+    .container {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* HEADER */
+    header {
+      border-bottom: 1px solid var(--border-color);
+      background-color: var(--bg-color);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .header-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      height: 80px;
+    }
+
+    .logo {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: var(--primary);
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 32px;
+    }
+
+    .nav-links a {
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover {
+      color: var(--primary);
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+    }
+
+    .btn-outline {
+      border: 2px solid var(--primary);
+      color: var(--primary);
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+
+    .btn-outline:hover {
+      background-color: var(--primary);
+      color: #fff;
+    }
+
+    .btn-text {
+      color: var(--text-main);
+      font-weight: 600;
+      padding: 10px 16px;
+      border-radius: 8px;
+      transition: all 0.2s;
+    }
+
+    .btn-text:hover {
+      color: var(--primary);
+      background-color: var(--surface-color);
+    }
+
+    .btn-solid {
+      background-color: var(--primary);
+      color: #fff;
+      padding: 10px 24px;
+      border-radius: 8px;
+      font-weight: 600;
+      transition: opacity 0.2s;
+    }
+
+    .btn-solid:hover {
+      opacity: 0.9;
+    }
+
+    .btn-danger {
+      color: #ef4444;
+      font-weight: 600;
+      padding: 10px 16px;
+    }
+
+    /* HERO */
+    .hero {
+      padding: 80px 0;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 64px;
+      align-items: center;
+    }
+
+    .hero h1 {
+      font-size: 3.5rem;
+      line-height: 1.1;
+      margin-bottom: 24px;
+    }
+
+    .hero p {
+      font-size: 1.125rem;
+      color: var(--text-muted);
+      margin-bottom: 32px;
+      max-width: 500px;
+    }
+
+    .video-container {
+      background-color: var(--surface-color);
+      border-radius: 16px;
+      aspect-ratio: 16 / 9;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* SOBRE A EMPRESA (NOVO) */
+    .about-section {
+      background-color: var(--surface-color);
+      padding: 80px 0;
+      border-top: 1px solid var(--border-color);
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .about-content {
+      text-align: center;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .about-content h2 {
+      font-size: 2.5rem;
+      margin-bottom: 24px;
+      color: var(--primary);
+    }
+
+    .about-content p {
+      font-size: 1.125rem;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+      line-height: 1.8;
+    }
+
+    .about-highlights {
+      display: flex;
+      justify-content: center;
+      gap: 32px;
+      margin-top: 40px;
+      flex-wrap: wrap;
+    }
+
+    .highlight-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      max-width: 200px;
+    }
+
+    .highlight-item i {
+      font-size: 2rem;
+      color: var(--primary);
+      background: rgba(13, 148, 136, 0.1);
+      padding: 16px;
+      border-radius: 50%;
+    }
+
+    .highlight-item h4 {
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    /* ESPECIALIDADES */
+    .specialties {
+      padding: 80px 0;
+    }
+
+    .section-header {
+      text-align: center;
+      margin-bottom: 64px;
+    }
+
+    .section-header h2 {
+      font-size: 2.5rem;
+      margin-bottom: 16px;
+    }
+
+    .grid-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 32px;
+    }
+
+    .card {
+      background-color: var(--bg-color);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 32px;
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+      border-color: var(--primary);
+    }
+
+    .card-icon {
+      width: 64px;
+      height: 64px;
+      background-color: var(--text-main);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 24px;
+    }
+
+    .card-icon i {
+      font-size: 1.5rem;
+      color: var(--bg-color);
+    }
+
+    .tag-libras {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background-color: rgba(13, 148, 136, 0.1);
+      color: var(--primary);
+      padding: 4px 12px;
+      border-radius: 99px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      margin-bottom: 16px;
+    }
+
+    .card h3 {
+      font-size: 1.25rem;
+      margin-bottom: 12px;
+    }
+
+    .card p {
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      margin-bottom: 24px;
+    }
+
+    .card-link {
+      color: var(--primary);
+      font-weight: 600;
+      font-size: 0.875rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* FOOTER & FAB */
+    footer {
+      background-color: #171717;
+      color: #fff;
+      padding: 48px 0;
+      text-align: center;
+    }
+
+    footer h2 {
+      font-size: 1.5rem;
+      margin-bottom: 8px;
+      color: #fff;
+    }
+
+    footer p {
+      color: #a3a3a3;
+      font-size: 0.875rem;
+    }
+
+    .accessibility-fab {
+      position: fixed;
+      right: 24px;
+      bottom: 24px;
+      width: 56px;
+      height: 56px;
+      background-color: var(--primary);
+      color: #fff;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      box-shadow: 0 10px 25px rgba(13, 148, 136, 0.4);
+      z-index: 100;
+    }
+
+    /* PAINEL A11Y SIMPLIFICADO AQUI PARA POUPAR ESPAÇO NO CÓDIGO (mantido via JS) */
+    .accessibility-panel {
+      position: fixed;
+      right: 24px;
+      bottom: 90px;
+      width: 300px;
+      background: var(--bg-color);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+      z-index: 100;
+      opacity: 0;
+      pointer-events: none;
+      transition: 0.3s;
+    }
+
+    .accessibility-panel.active {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .control-group {
+      margin-bottom: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    @media (max-width: 992px) {
+      .nav-links {
+        display: none;
+      }
+
+      .hero {
+        grid-template-columns: 1fr;
+        text-align: center;
+        padding: 40px 0;
+      }
+
+      .hero p {
+        margin: 0 auto 32px auto;
+      }
+
+      .about-highlights {
+        flex-direction: column;
+        align-items: center;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <header>
+    <div class="container header-content">
+      <div class="logo">INOVA</div>
+      <nav class="nav-links">
+        <a href="#">Início</a>
+        <a href="#sobre">Quem Somos</a>
+        <a href="#servicos">Serviços</a>
+      </nav>
+      <div class="header-actions" id="header-auth-section">
+        <button class="btn-text" onclick="window.location.href='login.html'">Login</button>
+        <button class="btn-solid" onclick="window.location.href='login.html'">Cadastro</button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="container hero">
+      <div>
+        <h1>Acolhimento e Acessibilidade para Todos</h1>
+        <p>Cuidado humanizado com recursos completos de acessibilidade, focados na inclusão e comunicação efetiva do
+          paciente.</p>
+        <button class="btn-solid" onclick="checkAuthAndRedirect()" style="padding: 16px 32px; font-size: 1rem;">Agendar
+          Minha Consulta</button>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 16px;">
+        <div class="video-container">
+          <iframe style="width: 100%; height: 100%; border: none;"
+            src="https://www.youtube.com/embed/CYKhx4muTV4?si=lN9UfR461eZTHJPK" title="Tutorial VLibras"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            allowfullscreen></iframe>
+        </div>
+        <div style="display: flex; justify-content: center;">
+          <a href="https://www.gov.br/governodigital/pt-br/vlibras/" target="_blank" class="btn-outline">
+            <i class="fa-solid fa-puzzle-piece"></i> Instalar Plugin VLibras
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <section id="sobre" class="about-section">
+      <div class="container about-content">
+        <h2>Conheça a Clínica Renova</h2>
+        <p>A <strong>Clínica Renova (INOVA)</strong> nasceu com um propósito claro: democratizar o acesso à saúde
+          através do acolhimento, da empatia e da tecnologia.</p>
+        <p>Entendemos que cada paciente é único e merece ser ouvido sem barreiras de comunicação. O nosso ambiente
+          físico e digital foi preparado do zero para promover a inclusão total, com suporte especializado e nativo em
+          LIBRAS (Língua Brasileira de Sinais). Aqui, você não é apenas um prontuário, é uma pessoa que merece o melhor
+          e mais acessível cuidado possível.</p>
+
+        <div class="about-highlights">
+          <div class="highlight-item">
+            <i class="fa-solid fa-hands-asl-interpreting"></i>
+            <h4>Suporte Nativo LIBRAS</h4>
+            <p style="font-size: 0.875rem; color: var(--text-muted); margin:0;">Profissionais bilíngues preparados para
+              o atender.</p>
+          </div>
+          <div class="highlight-item">
+            <i class="fa-solid fa-heart-pulse"></i>
+            <h4>Cuidado Humanizado</h4>
+            <p style="font-size: 0.875rem; color: var(--text-muted); margin:0;">Foco no bem-estar físico e emocional do
+              paciente.</p>
+          </div>
+          <div class="highlight-item">
+            <i class="fa-solid fa-mobile-screen-button"></i>
+            <h4>Tecnologia Inclusiva</h4>
+            <p style="font-size: 0.875rem; color: var(--text-muted); margin:0;">Agendamentos fáceis e acessíveis de
+              qualquer lugar.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="servicos" class="specialties">
+      <div class="container">
+        <div class="section-header">
+          <h2>Especialidades Clínicas</h2>
+          <p style="color: var(--text-muted);">Atendimento multidisciplinar capacitado em comunicação acessível</p>
+        </div>
+        <div class="grid-cards">
+          <div class="card">
+            <div class="card-icon"><i class="fa-solid fa-person-walking-with-cane"></i></div>
+            <div class="tag-libras"><i class="fa-solid fa-hands"></i> Atendimento em LIBRAS</div>
+            <h3>Fisioterapia</h3>
+            <p>Reabilitação física e motora com comunicação acessível e respeito à autonomia.</p>
+
+          </div>
+          <div class="card">
+            <div class="card-icon"><i class="fa-solid fa-ear-listen"></i></div>
+            <div class="tag-libras"><i class="fa-solid fa-hands"></i> Atendimento em LIBRAS</div>
+            <h3>Fonoaudiologia</h3>
+            <p>Avaliação e tratamento de distúrbios da comunicação com abordagens bilingues.</p>
+
+          </div>
+          <div class="card">
+            <div class="card-icon"><i class="fa-solid fa-brain"></i></div>
+            <div class="tag-libras"><i class="fa-solid fa-hands"></i> Atendimento em LIBRAS</div>
+            <h3>Psicologia</h3>
+            <p>Apoio emocional com acessibilidade total para garantir uma comunicação fluida.</p>
+
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <h2>INOVA</h2>
+    <p>Plataforma de saúde focada na inclusão e cuidado humanizado.</p>
+    <p style="margin-top: 32px;">© 2026 Clínica Renova (INOVA). Projeto PIM.</p>
+  </footer>
+
+  <button id="fab-btn" class="accessibility-fab"><i class="fa-solid fa-universal-access"></i></button>
+  <div id="acc-panel" class="accessibility-panel">
+    <h3 style="margin-bottom: 16px;">Acessibilidade</h3>
+    <button onclick="document.body.classList.toggle('high-contrast')" class="btn-solid"
+      style="width:100%; justify-content:center;">Alto Contraste</button>
+  </div>
+
+  <script>
+    // --- GESTÃO DE SESSÃO VIVA ---
+    const checkSession = () => {
+      const userName = localStorage.getItem('inova_userName');
+      const authSection = document.getElementById('header-auth-section');
+
+      if (userName) {
+        // Se estiver logado, troca os botões de Login/Cadastro pela saudação e botão Sair
+        const firstName = userName.split(' ')[0];
+        authSection.innerHTML = `
+          <span style="font-weight: 600; color: var(--text-main);">Olá, ${firstName}</span>
+          <a href="meus_agendamentos.html" class="btn-outline" style="padding: 8px 16px; font-size: 0.875rem;">
+            <i class="fa-solid fa-calendar-check"></i> Meus Agendamentos
+          </a>
+          <button class="btn-solid" onclick="window.location.href='marcar_consulta.html'" style="padding: 8px 16px;">Meu Painel</button>
+          <button class="btn-danger" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i> Sair</button>
+        `;
+      }
+    };
+
+    const logout = () => {
+      localStorage.removeItem('inova_userName');
+      localStorage.removeItem('inova_userPerfil');
+      window.location.reload(); // Recarrega a página para voltar ao estado original
+    };
+
+    const checkAuthAndRedirect = () => {
+      if (localStorage.getItem('inova_userName')) {
+        window.location.href = 'marcar_consulta.html';
+      } else {
+        window.location.href = 'login.html';
+      }
+    };
+
+    document.addEventListener('DOMContentLoaded', () => {
+      checkSession();
+      // Painel A11y
+      document.getElementById('fab-btn').onclick = () => document.getElementById('acc-panel').classList.toggle('active');
+    });
+  </script>
+</body>
+
+</html>

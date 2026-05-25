@@ -1,0 +1,940 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>INOVA – Meus Agendamentos</title>
+  <meta name="description" content="Visualize e gerencie seus agendamentos na Clínica INOVA.">
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    /* === VARIÁVEIS GLOBAIS E TEMA === */
+    :root {
+      --bg-color: #ffffff;
+      --surface-color: #f5f5f5;
+      --text-main: #171717;
+      --text-muted: #525252;
+      --primary: #0d9488;
+      --primary-hover: #0f766e;
+      --border-color: #e5e5e5;
+      --focus-ring: rgba(13, 148, 136, 0.4);
+      --danger: #ef4444;
+      --danger-hover: #dc2626;
+      --font-scale: 100%;
+    }
+
+    body.high-contrast {
+      --bg-color: #121212;
+      --surface-color: #1e1e1e;
+      --text-main: #ffffff;
+      --text-muted: #a3a3a3;
+      --primary: #2dd4bf;
+      --primary-hover: #5eead4;
+      --border-color: #404040;
+      --focus-ring: rgba(45, 212, 191, 0.8);
+      --danger: #f87171;
+      --danger-hover: #ef4444;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: system-ui, -apple-system, sans-serif;
+    }
+
+    html {
+      font-size: var(--font-scale);
+      transition: font-size 0.3s ease;
+      scroll-behavior: smooth;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      line-height: 1.5;
+      transition: background-color 0.3s, color 0.3s;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    a {
+      text-decoration: none;
+      color: inherit;
+    }
+
+    button {
+      cursor: pointer;
+      border: none;
+      background: none;
+      font-family: inherit;
+      color: inherit;
+    }
+
+    input:focus,
+    button:focus,
+    textarea:focus {
+      outline: 3px solid var(--focus-ring);
+      outline-offset: 2px;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 0 24px;
+      width: 100%;
+    }
+
+    /* === HEADER === */
+    header {
+      border-bottom: 1px solid var(--border-color);
+      background-color: var(--bg-color);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .header-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      height: 72px;
+    }
+
+    .logo {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: var(--primary);
+    }
+
+    .header-nav {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .btn-outline {
+      border: 2px solid var(--primary);
+      color: var(--primary);
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+      font-size: 0.875rem;
+    }
+
+    .btn-outline:hover {
+      background-color: var(--primary);
+      color: #fff;
+    }
+
+    .btn-solid {
+      background-color: var(--primary);
+      color: #fff;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: opacity 0.2s;
+      font-size: 0.875rem;
+    }
+
+    .btn-solid:hover {
+      opacity: 0.88;
+    }
+
+    .btn-danger {
+      color: var(--danger);
+      font-weight: 600;
+      padding: 10px 16px;
+      font-size: 0.875rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* === PAGE CONTENT === */
+    main {
+      flex: 1;
+      padding: 48px 0;
+    }
+
+    .page-header {
+      margin-bottom: 40px;
+    }
+
+    .page-header h1 {
+      font-size: 2rem;
+      margin-bottom: 8px;
+    }
+
+    .page-header p {
+      color: var(--text-muted);
+      font-size: 1rem;
+    }
+
+    .page-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 32px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    /* === APPOINTMENTS LIST === */
+    #appointments-list {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .appointment-card {
+      background-color: var(--bg-color);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 28px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 20px;
+      transition: box-shadow 0.2s, border-color 0.2s;
+    }
+
+    .appointment-card:hover {
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.07);
+      border-color: var(--primary);
+    }
+
+    .appointment-card.cancelado {
+      opacity: 0.6;
+      border-style: dashed;
+    }
+
+    .appt-info {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      flex: 1;
+    }
+
+    .appt-icon {
+      width: 52px;
+      height: 52px;
+      border-radius: 14px;
+      background-color: rgba(13, 148, 136, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      color: var(--primary);
+      flex-shrink: 0;
+    }
+
+    .appt-icon.cancelado-icon {
+      background-color: rgba(239, 68, 68, 0.08);
+      color: var(--danger);
+    }
+
+    .appt-details h3 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .appt-details p {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      margin-bottom: 2px;
+    }
+
+    .appt-meta {
+      display: flex;
+      gap: 12px;
+      margin-top: 8px;
+      flex-wrap: wrap;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 10px;
+      border-radius: 99px;
+      font-size: 0.75rem;
+      font-weight: 700;
+    }
+
+    .badge-confirmado {
+      background-color: rgba(13, 148, 136, 0.12);
+      color: var(--primary);
+    }
+
+    .badge-pendente {
+      background-color: rgba(234, 179, 8, 0.12);
+      color: #a16207;
+    }
+
+    body.high-contrast .badge-pendente {
+      color: #fde047;
+    }
+
+    .badge-cancelado {
+      background-color: rgba(239, 68, 68, 0.1);
+      color: var(--danger);
+    }
+
+    .badge-libras {
+      background-color: rgba(13, 148, 136, 0.1);
+      color: var(--primary);
+    }
+
+    .appt-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      align-items: flex-end;
+      flex-shrink: 0;
+    }
+
+    .btn-cancel-appt {
+      border: 1px solid var(--danger);
+      color: var(--danger);
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.8rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+
+    .btn-cancel-appt:hover {
+      background-color: var(--danger);
+      color: #fff;
+    }
+
+    /* === EMPTY STATE === */
+    .empty-state {
+      text-align: center;
+      padding: 80px 24px;
+      color: var(--text-muted);
+    }
+
+    .empty-state i {
+      font-size: 4rem;
+      margin-bottom: 24px;
+      color: var(--border-color);
+    }
+
+    .empty-state h2 {
+      font-size: 1.5rem;
+      margin-bottom: 12px;
+      color: var(--text-main);
+    }
+
+    .empty-state p {
+      margin-bottom: 32px;
+      font-size: 0.95rem;
+    }
+
+    /* === MODAL DE CANCELAMENTO === */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+      padding: 24px;
+    }
+
+    .modal-overlay.active {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .modal-box {
+      background-color: var(--bg-color);
+      border-radius: 20px;
+      padding: 40px;
+      width: 100%;
+      max-width: 520px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+      transform: scale(0.95);
+      transition: transform 0.3s;
+    }
+
+    .modal-overlay.active .modal-box {
+      transform: scale(1);
+    }
+
+    .modal-box h2 {
+      font-size: 1.4rem;
+      margin-bottom: 8px;
+    }
+
+    .modal-box p {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin-bottom: 24px;
+    }
+
+    .modal-appt-info {
+      background-color: var(--surface-color);
+      border-radius: 10px;
+      padding: 16px;
+      font-size: 0.875rem;
+      margin-bottom: 24px;
+      border: 1px solid var(--border-color);
+    }
+
+    .modal-appt-info strong {
+      display: block;
+      font-size: 1rem;
+      margin-bottom: 4px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 0.875rem;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    textarea.form-input {
+      width: 100%;
+      padding: 12px;
+      background-color: var(--surface-color);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      color: var(--text-main);
+      font-size: 0.9rem;
+      resize: vertical;
+      min-height: 100px;
+      transition: border-color 0.2s;
+    }
+
+    textarea.form-input:focus {
+      border-color: var(--primary);
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 24px;
+      justify-content: flex-end;
+    }
+
+    .btn-ghost {
+      padding: 10px 20px;
+      font-weight: 600;
+      color: var(--text-muted);
+      border-radius: 8px;
+      transition: background 0.2s;
+    }
+
+    .btn-ghost:hover {
+      background-color: var(--border-color);
+      color: var(--text-main);
+    }
+
+    .btn-danger-solid {
+      background-color: var(--danger);
+      color: #fff;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: background-color 0.2s;
+    }
+
+    .btn-danger-solid:hover {
+      background-color: var(--danger-hover);
+    }
+
+    /* === ACCESSIBILITY FAB === */
+    .accessibility-fab {
+      position: fixed;
+      right: 24px;
+      bottom: 24px;
+      width: 56px;
+      height: 56px;
+      background-color: var(--primary);
+      color: #fff;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      box-shadow: 0 10px 25px rgba(13, 148, 136, 0.4);
+      z-index: 100;
+      transition: transform 0.2s;
+    }
+
+    .accessibility-fab:hover {
+      transform: scale(1.1);
+    }
+
+    .accessibility-panel {
+      position: fixed;
+      right: 24px;
+      bottom: 90px;
+      width: 280px;
+      background: var(--bg-color);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+      z-index: 100;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s, transform 0.3s;
+      transform: translateY(10px);
+    }
+
+    .accessibility-panel.active {
+      opacity: 1;
+      pointer-events: all;
+      transform: translateY(0);
+    }
+
+    .a11y-panel-title {
+      font-weight: 700;
+      font-size: 0.95rem;
+      margin-bottom: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .control-group {
+      margin-bottom: 14px;
+    }
+
+    .control-group label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      display: block;
+      margin-bottom: 8px;
+    }
+
+    .font-controls {
+      display: flex;
+      gap: 8px;
+    }
+
+    .font-btn {
+      flex: 1;
+      padding: 8px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      font-weight: 700;
+      transition: all 0.2s;
+    }
+
+    .font-btn:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+
+    .contrast-btn {
+      width: 100%;
+      padding: 10px;
+      border-radius: 8px;
+      font-weight: 700;
+      background-color: var(--text-main);
+      color: var(--bg-color);
+      transition: opacity 0.2s;
+    }
+
+    .contrast-btn:hover {
+      opacity: 0.8;
+    }
+
+    /* === FOOTER === */
+    footer {
+      background-color: #171717;
+      color: #fff;
+      padding: 32px 0;
+      text-align: center;
+      margin-top: auto;
+    }
+
+    footer p {
+      color: #a3a3a3;
+      font-size: 0.875rem;
+    }
+
+    @media (max-width: 640px) {
+      .appointment-card {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .appt-actions {
+        width: 100%;
+        flex-direction: row;
+        justify-content: flex-end;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <header>
+    <div class="container header-content">
+      <a href="index.html" class="logo">INOVA</a>
+      <div class="header-nav" id="header-nav">
+        <a href="marcar_consulta.html" class="btn-outline">
+          <i class="fa-solid fa-plus"></i> Novo Agendamento
+        </a>
+        <span id="user-greeting" style="font-weight: 600; color: var(--text-muted);"></span>
+        <button class="btn-danger" onclick="logout()" id="btn-logout">
+          <i class="fa-solid fa-right-from-bracket"></i> Sair
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="container">
+
+      <div class="page-header">
+        <h1><i class="fa-solid fa-calendar-check" style="color: var(--primary); margin-right: 12px;"></i>Meus
+          Agendamentos</h1>
+        <p>Visualize e gerencie suas consultas agendadas na Clínica INOVA.</p>
+      </div>
+
+      <div class="page-actions">
+        <div id="appt-count" style="font-size: 0.875rem; color: var(--text-muted);"></div>
+        <a href="marcar_consulta.html" class="btn-solid">
+          <i class="fa-solid fa-calendar-plus"></i> Agendar Nova Consulta
+        </a>
+      </div>
+
+      <div id="appointments-list">
+        <!-- Preenchido via JS -->
+      </div>
+
+    </div>
+  </main>
+
+  <footer>
+    <p>© 2026 Clínica INOVA. Todos os direitos reservados.</p>
+  </footer>
+
+  <!-- Modal de Cancelamento -->
+  <div id="cancel-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal-box">
+      <h2 id="modal-title"><i class="fa-solid fa-triangle-exclamation"
+          style="color: var(--danger); margin-right: 8px;"></i>Cancelar Agendamento</h2>
+      <p>Tem certeza que deseja cancelar a consulta abaixo? Por favor, informe o motivo do cancelamento.</p>
+
+      <div class="modal-appt-info" id="modal-appt-info">
+        <!-- Preenchido via JS -->
+      </div>
+
+      <label class="form-label" for="cancel-justificativa">
+        Motivo / Justificativa <span style="color: var(--danger);">*</span>
+      </label>
+      <textarea id="cancel-justificativa" class="form-input" placeholder="Descreva o motivo do cancelamento..."
+        maxlength="500"></textarea>
+
+      <div class="modal-actions">
+        <button class="btn-ghost" onclick="closeModal()" id="btn-modal-close">
+          <i class="fa-solid fa-x"></i> Manter Consulta
+        </button>
+        <button class="btn-danger-solid" onclick="confirmarCancelamento()" id="btn-confirm-cancel">
+          <i class="fa-solid fa-ban"></i> Confirmar Cancelamento
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- FAB de Acessibilidade -->
+  <button id="fab-btn" class="accessibility-fab" aria-label="Opções de acessibilidade">
+    <i class="fa-solid fa-universal-access"></i>
+  </button>
+
+  <div id="acc-panel" class="accessibility-panel" role="region" aria-label="Painel de acessibilidade">
+    <div class="a11y-panel-title">
+      <span>Acessibilidade</span>
+      <button onclick="document.getElementById('acc-panel').classList.remove('active')"
+        style="color: var(--text-muted); font-size: 0.85rem;">&times;</button>
+    </div>
+    <div class="control-group">
+      <label>Tamanho da fonte</label>
+      <div class="font-controls">
+        <button class="font-btn" onclick="changeFont(-10)" aria-label="Diminuir fonte">A-</button>
+        <button class="font-btn" onclick="changeFont(0)" aria-label="Resetar fonte">A</button>
+        <button class="font-btn" onclick="changeFont(10)" aria-label="Aumentar fonte">A+</button>
+      </div>
+    </div>
+    <div class="control-group">
+      <label>Contraste</label>
+      <button class="contrast-btn" onclick="document.body.classList.toggle('high-contrast')" id="contrast-btn-label">
+        <i class="fa-solid fa-circle-half-stroke"></i> Alto Contraste
+      </button>
+    </div>
+  </div>
+
+  <script>
+    // ====================================================
+    // ESTADO DA APLICAÇÃO
+    // ====================================================
+    let agendamentos = [];
+    let cancelTargetId = null;
+
+    const MESES = ["janeiro", "fevereiro", "março", "abril", "maio", "junho",
+      "julho", "agosto", "setembro", "outubro", "novembro", "dezembro"];
+
+    // ====================================================
+    // INICIALIZAÇÃO
+    // ====================================================
+    const API_BASE_URL = 'http://localhost:5017';
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      // Verifica sessão
+      const userName = localStorage.getItem('inova_userName');
+      if (!userName) {
+        window.location.href = 'login/cadastro/login.html';
+        return;
+      }
+
+      const firstName = userName.split(' ')[0];
+      document.getElementById('user-greeting').textContent = `Olá, ${firstName}`;
+
+      // Busca agendamentos da API; usa localStorage como fallback
+      await carregarAgendamentos();
+
+      // FAB Acessibilidade
+      document.getElementById('fab-btn').onclick = () => {
+        document.getElementById('acc-panel').classList.toggle('active');
+      };
+
+      // Fechar modal ao clicar fora
+      document.getElementById('cancel-modal').addEventListener('click', (e) => {
+        if (e.target === document.getElementById('cancel-modal')) closeModal();
+      });
+    });
+
+    // LÓGICA: Buscar dados auxiliares (Serviços e Profissionais) em paralelo aos agendamentos 
+    // para cruzar os IDs com os nomes reais, já que a API principal não traz esses dados populados.
+
+    async function carregarAgendamentos() {
+      try {
+        const pacienteId = localStorage.getItem('inova_userId');
+
+        // Dispara as três requisições simultaneamente para otimizar performance
+        const [resAgendamentos, resServicos, resUsuarios] = await Promise.all([
+          fetch(`${API_BASE_URL}/api/agendamento`),
+          fetch(`${API_BASE_URL}/api/servico`),
+          fetch(`${API_BASE_URL}/api/usuario`) // Usando usuario para pegar nomes de profissionais
+        ]);
+
+        if (!resAgendamentos.ok) throw new Error('Erro ao buscar agendamentos');
+
+        const dadosAgendamentos = await resAgendamentos.json();
+        const dadosServicos = resServicos.ok ? await resServicos.json() : [];
+        const dadosUsuarios = resUsuarios.ok ? await resUsuarios.json() : [];
+
+        // Cruzamento de dados (Client-side join)
+        agendamentos = dadosAgendamentos
+          .filter(a => !pacienteId || a.pacienteId == pacienteId || a.PacienteId == pacienteId)
+          .map(a => {
+            // Encontra o serviço e o profissional correspondentes nas listas auxiliares
+            const servicoEncontrado = dadosServicos.find(s => (s.id || s.Id) === (a.servicoId || a.ServicoId));
+            const profissionalEncontrado = dadosUsuarios.find(u => (u.id || u.Id) === (a.profissionalId || a.ProfissionalId));
+
+            return {
+              Id: a.id || a.Id,
+              // Aplica o nome encontrado ou mantém o fallback
+              Especialidade: servicoEncontrado?.descricao || servicoEncontrado?.Descricao || `Serviço #${a.servicoId || a.ServicoId}`,
+              Medico: profissionalEncontrado?.nome || profissionalEncontrado?.Nome || `Profissional #${a.profissionalId || a.ProfissionalId}`,
+              DataHora: a.dataHora || a.DataHora,
+              Dia: new Date(a.dataHora || a.DataHora).getDate(),
+              Mes: new Date(a.dataHora || a.DataHora).getMonth() + 1,
+              Ano: new Date(a.dataHora || a.DataHora).getFullYear(),
+              Hora: new Date(a.dataHora || a.DataHora).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
+              Status: a.status || a.Status || 'Pendente',
+              RequerLibras: a.RequerLibras || false,
+              DataAgendamento: a.DataAgendamento || new Date().toLocaleDateString('pt-BR')
+            };
+          });
+
+        localStorage.setItem('inova_agendamentos', JSON.stringify(agendamentos));
+        renderAgendamentos();
+
+      } catch (err) {
+        console.warn('API indisponível ou erro no cruzamento de dados. Usando dados do localStorage:', err);
+        agendamentos = JSON.parse(localStorage.getItem('inova_agendamentos') || '[]');
+        renderAgendamentos();
+      }
+    }
+
+    // ====================================================
+    // RENDER DE AGENDAMENTOS
+    // ====================================================
+    function renderAgendamentos() {
+      const container = document.getElementById('appointments-list');
+      const countEl = document.getElementById('appt-count');
+
+      if (!agendamentos || agendamentos.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <i class="fa-regular fa-calendar-xmark"></i>
+            <h2>Nenhum agendamento encontrado</h2>
+            <p>Você ainda não possui consultas agendadas. Que tal marcar sua primeira consulta?</p>
+            <a href="marcar_consulta.html" class="btn-solid" style="margin: 0 auto; display: inline-flex;">
+              <i class="fa-solid fa-calendar-plus"></i> Agendar Consulta
+            </a>
+          </div>`;
+        countEl.textContent = '';
+        return;
+      }
+
+      const ativos = agendamentos.filter(a => a.Status !== 'Cancelado').length;
+      countEl.textContent = `${agendamentos.length} agendamento(s) — ${ativos} ativo(s)`;
+
+      // Mais recente primeiro
+      const sorted = [...agendamentos].reverse();
+
+      container.innerHTML = sorted.map(appt => {
+        const cancelado = appt.Status === 'Cancelado';
+        const dataFormatada = `${parseInt(appt.Dia)} de ${MESES[appt.Mes - 1]} de ${appt.Ano} às ${appt.Hora}`;
+        const librasTag = appt.RequerLibras
+          ? `<span class="badge badge-libras"><i class="fa-solid fa-hands"></i> LIBRAS</span>` : '';
+        const statusClass = {
+          'Confirmado': 'badge-confirmado',
+          'Pendente': 'badge-pendente',
+          'Cancelado': 'badge-cancelado'
+        }[appt.Status] || 'badge-pendente';
+
+        const justificativaHtml = cancelado && appt.Justificativa
+          ? `<p style="font-size: 0.78rem; color: var(--danger); margin-top: 6px;">
+               <i class="fa-solid fa-circle-info"></i> Motivo: ${appt.Justificativa}
+             </p>` : '';
+
+        const cancelBtn = !cancelado
+          ? `<button class="btn-cancel-appt" onclick="abrirModalCancelamento(${appt.Id})" aria-label="Cancelar consulta de ${appt.Especialidade}">
+               <i class="fa-solid fa-ban"></i> Cancelar
+             </button>` : '';
+
+        return `
+          <div class="appointment-card ${cancelado ? 'cancelado' : ''}" id="card-${appt.Id}">
+            <div class="appt-info">
+              <div class="appt-icon ${cancelado ? 'cancelado-icon' : ''}">
+                <i class="fa-solid ${cancelado ? 'fa-ban' : 'fa-stethoscope'}"></i>
+              </div>
+              <div class="appt-details">
+                <h3>${appt.Especialidade || 'Especialidade'}</h3>
+                <p><i class="fa-solid fa-user-doctor" style="width:14px;"></i> ${appt.Medico || 'Profissional não informado'}</p>
+                <p><i class="fa-regular fa-clock" style="width:14px;"></i> ${dataFormatada}</p>
+                <p style="font-size: 0.78rem; color: var(--text-muted);"><i class="fa-regular fa-calendar-days" style="width:14px;"></i> Agendado em: ${appt.DataAgendamento || 'N/A'}</p>
+                ${justificativaHtml}
+                <div class="appt-meta">
+                  <span class="badge ${statusClass}">
+                    <i class="fa-solid fa-circle" style="font-size: 0.5rem;"></i> ${appt.Status}
+                  </span>
+                  ${librasTag}
+                </div>
+              </div>
+            </div>
+            <div class="appt-actions">
+              ${cancelBtn}
+            </div>
+          </div>`;
+      }).join('');
+    }
+
+    // ====================================================
+    // CANCELAMENTO
+    // ====================================================
+    function abrirModalCancelamento(id) {
+      cancelTargetId = id;
+      const appt = agendamentos.find(a => a.Id === id);
+      if (!appt) return;
+
+      const dataFormatada = `${parseInt(appt.Dia)} de ${MESES[appt.Mes - 1]} de ${appt.Ano} às ${appt.Hora}`;
+      document.getElementById('modal-appt-info').innerHTML = `
+        <strong>${appt.Especialidade}</strong>
+        <span><i class="fa-solid fa-user-doctor"></i> ${appt.Medico}</span><br>
+        <span><i class="fa-regular fa-clock"></i> ${dataFormatada}</span>
+      `;
+      document.getElementById('cancel-justificativa').value = '';
+      document.getElementById('cancel-modal').classList.add('active');
+      document.getElementById('cancel-justificativa').focus();
+    }
+
+    function closeModal() {
+      document.getElementById('cancel-modal').classList.remove('active');
+      cancelTargetId = null;
+    }
+
+    function confirmarCancelamento() {
+      const justificativa = document.getElementById('cancel-justificativa').value.trim();
+      if (!justificativa) {
+        document.getElementById('cancel-justificativa').focus();
+        document.getElementById('cancel-justificativa').style.borderColor = 'var(--danger)';
+        return;
+      }
+
+      // Aplica cancelamento
+      agendamentos = agendamentos.map(a => {
+        if (a.Id === cancelTargetId) {
+          return { ...a, Status: 'Cancelado', Justificativa: justificativa };
+        }
+        return a;
+      });
+
+      // Persiste
+      localStorage.setItem('inova_agendamentos', JSON.stringify(agendamentos));
+      closeModal();
+      renderAgendamentos();
+    }
+
+    // ====================================================
+    // SESSÃO / LOGOUT
+    // ====================================================
+    function logout() {
+      localStorage.removeItem('inova_userName');
+      localStorage.removeItem('inova_userId');
+      localStorage.removeItem('inova_userRole');
+      localStorage.removeItem('inova_userPerfil');
+      window.location.href = 'index.html';
+    }
+
+    // ====================================================
+    // ACESSIBILIDADE
+    // ====================================================
+    let currentFontSize = 100;
+    function changeFont(delta) {
+      if (delta === 0) {
+        currentFontSize = 100;
+      } else {
+        currentFontSize = Math.min(140, Math.max(80, currentFontSize + delta));
+      }
+      document.documentElement.style.setProperty('--font-scale', currentFontSize + '%');
+    }
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,1209 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>INOVA – Meu Histórico Clínico</title>
+  <meta name="description" content="Visualize seu histórico clínico e prontuários na Clínica INOVA.">
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    /* === VARIÁVEIS GLOBAIS E TEMA === */
+    :root {
+      --bg-color: #ffffff;
+      --surface-color: #f5f5f5;
+      --text-main: #171717;
+      --text-muted: #525252;
+      --primary: #0d9488;
+      --primary-hover: #0f766e;
+      --primary-light: rgba(13, 148, 136, 0.08);
+      --border-color: #e5e5e5;
+      --focus-ring: rgba(13, 148, 136, 0.4);
+      --danger: #ef4444;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --font-scale: 100%;
+    }
+
+    body.high-contrast {
+      --bg-color: #121212;
+      --surface-color: #1e1e1e;
+      --text-main: #ffffff;
+      --text-muted: #a3a3a3;
+      --primary: #2dd4bf;
+      --primary-hover: #5eead4;
+      --primary-light: rgba(45, 212, 191, 0.12);
+      --border-color: #404040;
+      --focus-ring: rgba(45, 212, 191, 0.8);
+      --danger: #f87171;
+      --success: #34d399;
+      --warning: #fbbf24;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: system-ui, -apple-system, sans-serif;
+    }
+
+    html {
+      font-size: var(--font-scale);
+      transition: font-size 0.3s ease;
+      scroll-behavior: smooth;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      line-height: 1.5;
+      transition: background-color 0.3s, color 0.3s;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    a {
+      text-decoration: none;
+      color: inherit;
+    }
+
+    button {
+      cursor: pointer;
+      border: none;
+      background: none;
+      font-family: inherit;
+      color: inherit;
+    }
+
+    *:focus-visible {
+      outline: 3px solid var(--focus-ring);
+      outline-offset: 2px;
+    }
+
+    .container {
+      max-width: 1024px;
+      margin: 0 auto;
+      padding: 0 24px;
+      width: 100%;
+    }
+
+    /* === HEADER === */
+    header {
+      border-bottom: 1px solid var(--border-color);
+      background-color: var(--bg-color);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .header-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      height: 72px;
+      gap: 16px;
+    }
+
+    .logo {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: var(--primary);
+      flex-shrink: 0;
+    }
+
+    .header-nav {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .btn-outline {
+      border: 2px solid var(--primary);
+      color: var(--primary);
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+      font-size: 0.875rem;
+      white-space: nowrap;
+    }
+
+    .btn-outline:hover {
+      background-color: var(--primary);
+      color: #fff;
+    }
+
+    .btn-solid {
+      background-color: var(--primary);
+      color: #fff;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: opacity 0.2s;
+      font-size: 0.875rem;
+      white-space: nowrap;
+    }
+
+    .btn-solid:hover {
+      opacity: 0.88;
+    }
+
+    .btn-danger-text {
+      color: var(--danger);
+      font-weight: 600;
+      padding: 10px 12px;
+      font-size: 0.875rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* === MAIN === */
+    main {
+      flex: 1;
+      padding: 48px 0 80px;
+    }
+
+    /* === PAGE HEADER === */
+    .page-header {
+      margin-bottom: 40px;
+    }
+
+    .page-header h1 {
+      font-size: 2rem;
+      margin-bottom: 8px;
+    }
+
+    .page-header p {
+      color: var(--text-muted);
+    }
+
+    /* === FILTROS === */
+    .filters-bar {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 32px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .filter-btn {
+      padding: 8px 18px;
+      border-radius: 99px;
+      border: 1px solid var(--border-color);
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      background: var(--bg-color);
+      transition: all 0.2s;
+    }
+
+    .filter-btn:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+
+    .filter-btn.active {
+      background-color: var(--primary);
+      border-color: var(--primary);
+      color: #fff;
+    }
+
+    .filters-count {
+      margin-left: auto;
+      font-size: 0.875rem;
+      color: var(--text-muted);
+    }
+
+    /* === TIMELINE === */
+    .timeline {
+      position: relative;
+      padding-left: 40px;
+    }
+
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 15px;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: var(--border-color);
+    }
+
+    .timeline-group {
+      margin-bottom: 40px;
+    }
+
+    .timeline-month-label {
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+      padding-left: 4px;
+    }
+
+    .timeline-item {
+      position: relative;
+      margin-bottom: 16px;
+    }
+
+    .timeline-dot {
+      position: absolute;
+      left: -32px;
+      top: 20px;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background-color: var(--primary);
+      border: 2px solid var(--bg-color);
+      box-shadow: 0 0 0 2px var(--primary);
+      z-index: 2;
+    }
+
+    .timeline-dot.cancelado {
+      background-color: var(--danger);
+      box-shadow: 0 0 0 2px var(--danger);
+    }
+
+    .timeline-dot.pendente {
+      background-color: var(--warning);
+      box-shadow: 0 0 0 2px var(--warning);
+    }
+
+    /* === CARD DE CONSULTA === */
+    .consulta-card {
+      background-color: var(--bg-color);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      overflow: hidden;
+      transition: box-shadow 0.2s, border-color 0.2s;
+    }
+
+    .consulta-card:hover {
+      border-color: var(--primary);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
+    }
+
+    .consulta-card.cancelado {
+      opacity: 0.65;
+    }
+
+    .card-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      padding: 20px 24px;
+      gap: 16px;
+    }
+
+    .card-info {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex: 1;
+      min-width: 0;
+    }
+
+    .card-icon-wrap {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      background-color: var(--primary-light);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      color: var(--primary);
+      flex-shrink: 0;
+    }
+
+    .card-icon-wrap.cancelado {
+      background-color: rgba(239, 68, 68, 0.08);
+      color: var(--danger);
+    }
+
+    .card-text {
+      min-width: 0;
+    }
+
+    .card-text h3 {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 3px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .card-text .meta {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 6px;
+    }
+
+    .card-text .meta span {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .card-badges {
+      display: flex;
+      gap: 8px;
+      flex-shrink: 0;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 10px;
+      border-radius: 99px;
+      font-size: 0.72rem;
+      font-weight: 700;
+    }
+
+    .badge-confirmado {
+      background-color: rgba(13, 148, 136, 0.1);
+      color: var(--primary);
+    }
+
+    .badge-pendente {
+      background-color: rgba(245, 158, 11, 0.12);
+      color: #92400e;
+    }
+
+    body.high-contrast .badge-pendente {
+      color: var(--warning);
+    }
+
+    .badge-cancelado {
+      background-color: rgba(239, 68, 68, 0.1);
+      color: var(--danger);
+    }
+
+    .badge-finalizado {
+      background-color: rgba(16, 185, 129, 0.1);
+      color: #065f46;
+    }
+
+    body.high-contrast .badge-finalizado {
+      color: var(--success);
+    }
+
+    .badge-libras {
+      background-color: var(--primary-light);
+      color: var(--primary);
+    }
+
+    /* === PRONTUÁRIO EXPANDIDO === */
+    .prontuario-area {
+      border-top: 1px solid var(--border-color);
+      background-color: var(--surface-color);
+      overflow: hidden;
+      max-height: 0;
+      transition: max-height 0.4s ease;
+    }
+
+    .prontuario-area.open {
+      max-height: 600px;
+    }
+
+    .prontuario-inner {
+      padding: 24px;
+    }
+
+    .pront-title {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: var(--text-muted);
+      margin-bottom: 10px;
+    }
+
+    .pront-block {
+      background-color: var(--bg-color);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 16px;
+      margin-bottom: 16px;
+      font-size: 0.9rem;
+      line-height: 1.7;
+      color: var(--text-main);
+      white-space: pre-wrap;
+    }
+
+    .pront-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .btn-expand {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--primary);
+      padding: 12px 24px;
+      border-top: 1px solid var(--border-color);
+      width: 100%;
+      text-align: left;
+      transition: background 0.2s;
+    }
+
+    .btn-expand:hover {
+      background: var(--surface-color);
+    }
+
+    .btn-expand i {
+      transition: transform 0.3s;
+    }
+
+    .btn-expand.open i.fa-chevron-down {
+      transform: rotate(180deg);
+    }
+
+    .no-pront {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      font-style: italic;
+    }
+
+    /* === ESTADO VAZIO === */
+    .empty-state {
+      text-align: center;
+      padding: 80px 24px;
+      color: var(--text-muted);
+    }
+
+    .empty-state i {
+      font-size: 4rem;
+      margin-bottom: 24px;
+      color: var(--border-color);
+      display: block;
+    }
+
+    .empty-state h2 {
+      font-size: 1.4rem;
+      color: var(--text-main);
+      margin-bottom: 10px;
+    }
+
+    .empty-state p {
+      margin-bottom: 32px;
+    }
+
+    /* === LOADING === */
+    .loading-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 80px 24px;
+      gap: 16px;
+      color: var(--text-muted);
+    }
+
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid var(--border-color);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* === SUMÁRIO CLÍNICO === */
+    .summary-strip {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 12px;
+      margin-bottom: 32px;
+    }
+
+    .summary-card {
+      background-color: var(--surface-color);
+      border-radius: 12px;
+      padding: 16px;
+      text-align: center;
+      border: 1px solid var(--border-color);
+    }
+
+    .summary-card .num {
+      font-size: 1.8rem;
+      font-weight: 800;
+      color: var(--primary);
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+
+    .summary-card .lbl {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    /* === ACESSIBILIDADE FAB === */
+    .accessibility-fab {
+      position: fixed;
+      right: 24px;
+      bottom: 24px;
+      width: 56px;
+      height: 56px;
+      background-color: var(--primary);
+      color: #fff;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      box-shadow: 0 10px 25px rgba(13, 148, 136, 0.4);
+      z-index: 100;
+      transition: transform 0.2s;
+    }
+
+    .accessibility-fab:hover {
+      transform: scale(1.1);
+    }
+
+    .accessibility-panel {
+      position: fixed;
+      right: 24px;
+      bottom: 90px;
+      width: 270px;
+      background: var(--bg-color);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+      z-index: 100;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s, transform 0.3s;
+      transform: translateY(10px);
+    }
+
+    .accessibility-panel.active {
+      opacity: 1;
+      pointer-events: all;
+      transform: translateY(0);
+    }
+
+    .a11y-title {
+      font-weight: 700;
+      font-size: 0.9rem;
+      margin-bottom: 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .a11y-control {
+      margin-bottom: 12px;
+    }
+
+    .a11y-label {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      display: block;
+      margin-bottom: 7px;
+    }
+
+    .font-controls {
+      display: flex;
+      gap: 8px;
+    }
+
+    .font-btn {
+      flex: 1;
+      padding: 8px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      font-weight: 700;
+      transition: all 0.2s;
+      font-size: 0.85rem;
+    }
+
+    .font-btn:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+
+    .contrast-btn {
+      width: 100%;
+      padding: 10px;
+      border-radius: 8px;
+      font-weight: 700;
+      background-color: var(--text-main);
+      color: var(--bg-color);
+      transition: opacity 0.2s;
+      font-size: 0.85rem;
+    }
+
+    .contrast-btn:hover {
+      opacity: 0.8;
+    }
+
+    /* === FOOTER === */
+    footer {
+      background-color: #171717;
+      color: #fff;
+      padding: 28px 0;
+      text-align: center;
+      margin-top: auto;
+    }
+
+    footer p {
+      color: #a3a3a3;
+      font-size: 0.875rem;
+    }
+
+    /* === RESPONSIVIDADE === */
+    @media (max-width: 640px) {
+      main {
+        padding: 32px 0 80px;
+      }
+
+      .page-header h1 {
+        font-size: 1.5rem;
+      }
+
+      .header-nav .btn-outline {
+        display: none;
+      }
+
+      .timeline {
+        padding-left: 28px;
+      }
+
+      .timeline::before {
+        left: 10px;
+      }
+
+      .timeline-dot {
+        left: -22px;
+        width: 12px;
+        height: 12px;
+      }
+
+      .card-top {
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .card-badges {
+        justify-content: flex-start;
+      }
+
+      .pront-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .summary-strip {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .filters-count {
+        display: none;
+      }
+    }
+
+    @media (max-width: 400px) {
+      .container {
+        padding: 0 16px;
+      }
+
+      .card-info {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <header>
+    <div class="container header-content">
+      <a href="index.html" class="logo">INOVA</a>
+      <nav class="header-nav" aria-label="Navegação principal">
+        <a href="meus_agendamentos.html" class="btn-outline" aria-label="Ver meus agendamentos">
+          <i class="fa-solid fa-calendar-check" aria-hidden="true"></i>
+          <span>Agendamentos</span>
+        </a>
+        <span id="user-greeting" style="font-weight:600; color:var(--text-muted); font-size:0.9rem;"></span>
+        <button class="btn-danger-text" onclick="logout()" aria-label="Sair da conta">
+          <i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i>
+          <span>Sair</span>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <div class="container">
+
+      <div class="page-header">
+        <h1>
+          <i class="fa-solid fa-file-medical" style="color:var(--primary); margin-right:12px;" aria-hidden="true"></i>
+          Meu Histórico Clínico
+        </h1>
+        <p>Registro completo dos seus atendimentos e prontuários na Clínica INOVA.</p>
+      </div>
+
+      <!-- Sumário -->
+      <div class="summary-strip" id="summary-strip" aria-label="Resumo do histórico" role="region">
+        <div class="summary-card">
+          <div class="num" id="sum-total">–</div>
+          <div class="lbl">Total de consultas</div>
+        </div>
+        <div class="summary-card">
+          <div class="num" id="sum-prontuarios">–</div>
+          <div class="lbl">Com prontuário</div>
+        </div>
+        <div class="summary-card">
+          <div class="num" id="sum-cancelados">–</div>
+          <div class="lbl">Cancelados</div>
+        </div>
+        <div class="summary-card">
+          <div class="num" id="sum-pendentes">–</div>
+          <div class="lbl">Pendentes</div>
+        </div>
+      </div>
+
+      <!-- Filtros -->
+      <div class="filters-bar" role="group" aria-label="Filtrar por status">
+        <button class="filter-btn active" data-filter="todos" onclick="aplicarFiltro(this)">Todos</button>
+        <button class="filter-btn" data-filter="Confirmado" onclick="aplicarFiltro(this)">Confirmados</button>
+        <button class="filter-btn" data-filter="Finalizado" onclick="aplicarFiltro(this)">Finalizados</button>
+        <button class="filter-btn" data-filter="Pendente" onclick="aplicarFiltro(this)">Pendentes</button>
+        <button class="filter-btn" data-filter="Cancelado" onclick="aplicarFiltro(this)">Cancelados</button>
+        <span class="filters-count" id="filters-count" aria-live="polite"></span>
+      </div>
+
+      <!-- Lista principal -->
+      <div id="historico-container" aria-live="polite" aria-label="Histórico de consultas">
+        <div class="loading-state" role="status" aria-label="Carregando histórico">
+          <div class="spinner" aria-hidden="true"></div>
+          <p>Carregando seu histórico...</p>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <footer>
+    <p>© 2026 Clínica INOVA. Todos os direitos reservados.</p>
+  </footer>
+
+  <!-- FAB Acessibilidade -->
+  <button id="fab-btn" class="accessibility-fab" aria-label="Opções de acessibilidade" aria-expanded="false">
+    <i class="fa-solid fa-universal-access" aria-hidden="true"></i>
+  </button>
+
+  <div id="acc-panel" class="accessibility-panel" role="region" aria-label="Painel de acessibilidade">
+    <div class="a11y-title">
+      <span>Acessibilidade</span>
+      <button onclick="fecharA11yPanel()" style="color:var(--text-muted); font-size:0.9rem;"
+        aria-label="Fechar painel">&times;</button>
+    </div>
+    <div class="a11y-control">
+      <span class="a11y-label">Tamanho da fonte</span>
+      <div class="font-controls">
+        <button class="font-btn" onclick="changeFont(-10)" aria-label="Diminuir fonte">A-</button>
+        <button class="font-btn" onclick="changeFont(0)" aria-label="Fonte padrão">A</button>
+        <button class="font-btn" onclick="changeFont(10)" aria-label="Aumentar fonte">A+</button>
+      </div>
+    </div>
+    <div class="a11y-control">
+      <span class="a11y-label">Contraste</span>
+      <button class="contrast-btn" onclick="document.body.classList.toggle('high-contrast')" id="contrast-btn-label">
+        <i class="fa-solid fa-circle-half-stroke" aria-hidden="true"></i> Alto Contraste
+      </button>
+    </div>
+  </div>
+
+  <script>
+    // =============================================
+    // CONFIGURAÇÃO DA API
+    // =============================================
+    const API_BASE_URL = 'http://localhost:5017';
+
+    const ENDPOINTS = {
+      agendamentos: `${API_BASE_URL}/api/agendamento`,
+      prontuarios: `${API_BASE_URL}/api/Prontuario`,
+      servicos: `${API_BASE_URL}/api/servico`,
+      usuarios: `${API_BASE_URL}/api/usuario`,
+      historicoPaciente: `${API_BASE_URL}/api/Paciente/historico`
+    };
+
+    const MESES = [
+      'janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho',
+      'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'
+    ];
+
+    // =============================================
+    // ESTADO
+    // =============================================
+    let todosOsRegistros = [];
+    let filtroAtual = 'todos';
+    let currentFontSize = 100;
+
+    // =============================================
+    // INICIALIZAÇÃO
+    // =============================================
+    document.addEventListener('DOMContentLoaded', async () => {
+      // Proteção de rota
+      const userName = localStorage.getItem('inova_userName');
+      if (!userName) {
+        window.location.href = 'login/cadastro/login.html';
+        return;
+      }
+
+      const firstName = userName.split(' ')[0];
+      document.getElementById('user-greeting').textContent = `Olá, ${firstName}`;
+
+      await carregarHistorico();
+
+      // FAB acessibilidade
+      document.getElementById('fab-btn').addEventListener('click', () => {
+        const panel = document.getElementById('acc-panel');
+        const fab = document.getElementById('fab-btn');
+        const open = panel.classList.toggle('active');
+        fab.setAttribute('aria-expanded', String(open));
+      });
+    });
+
+    // =============================================
+    // CARREGAMENTO DE DADOS
+    // =============================================
+    async function carregarHistorico() {
+      const pacienteId = localStorage.getItem('inova_userId');
+
+      try {
+        // Busca agendamentos, prontuários e serviços em paralelo
+        const [resAg, resPr, resSv, resUs] = await Promise.all([
+          fetch(ENDPOINTS.agendamentos).catch(() => null),
+          fetch(ENDPOINTS.prontuarios).catch(() => null),
+          fetch(ENDPOINTS.servicos).catch(() => null),
+          fetch(ENDPOINTS.usuarios).catch(() => null)
+        ]);
+
+        const agendamentos = (resAg && resAg.ok) ? await resAg.json() : [];
+        const prontuarios = (resPr && resPr.ok) ? await resPr.json() : [];
+        const servicos = (resSv && resSv.ok) ? await resSv.json() : [];
+        const usuarios = (resUs && resUs.ok) ? await resUs.json() : [];
+
+        // Filtra apenas os agendamentos do paciente logado
+        const meus = agendamentos.filter(a => {
+          if (!pacienteId) return true;
+          return (a.pacienteId || a.PacienteId) == pacienteId;
+        });
+
+        // Cruzamento: enriquece cada agendamento com serviço, profissional e prontuário
+        todosOsRegistros = meus.map(a => {
+          const agId = a.id ?? a.Id;
+          const servicoId = a.servicoId ?? a.ServicoId;
+          const profId = a.profissionalId ?? a.ProfissionalId;
+
+          const servico = servicos.find(s => (s.id ?? s.Id) === servicoId);
+          const profissional = usuarios.find(u => (u.id ?? u.Id) === profId);
+          const prontuario = prontuarios.find(p => (p.agendamentoId ?? p.AgendamentoId) === agId);
+
+          const dataHoraRaw = a.dataHora ?? a.DataHora;
+          const dt = dataHoraRaw ? new Date(dataHoraRaw) : null;
+
+          return {
+            id: agId,
+            especialidade: servico?.descricao ?? servico?.Descricao ?? `Serviço #${servicoId}`,
+            profissional: profissional?.nome ?? profissional?.Nome ?? `Profissional #${profId}`,
+            status: a.status ?? a.Status ?? 'Pendente',
+            requerLibras: a.requerLibras ?? a.RequerLibras ?? false,
+            dataHora: dt,
+            dia: dt ? dt.getDate() : '?',
+            mes: dt ? dt.getMonth() : 0,
+            ano: dt ? dt.getFullYear() : '?',
+            hora: dt ? dt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : '--:--',
+            prontuario: prontuario ? {
+              id: prontuario.id ?? prontuario.Id,
+              evolucaoClinica: prontuario.evolucaoClinica ?? prontuario.EvolucaoClinica ?? '',
+              prescricao: prontuario.prescricao ?? prontuario.Prescricao ?? ''
+            } : null
+          };
+        });
+
+        // Fallback: se API não retornou nada, tenta localStorage
+        if (todosOsRegistros.length === 0) {
+          const local = JSON.parse(localStorage.getItem('inova_agendamentos') || '[]');
+          todosOsRegistros = local.map(a => ({
+            id: a.Id ?? a.id ?? Date.now(),
+            especialidade: a.Especialidade ?? 'Especialidade',
+            profissional: a.Medico ?? 'Profissional',
+            status: a.Status ?? 'Pendente',
+            requerLibras: a.RequerLibras ?? false,
+            dataHora: null,
+            dia: a.Dia ?? '?',
+            mes: (a.Mes ?? 1) - 1,
+            ano: a.Ano ?? '?',
+            hora: a.Hora ?? '--:--',
+            prontuario: null
+          }));
+        }
+
+        atualizarSumario();
+        renderHistorico();
+
+      } catch (err) {
+        console.error('Erro ao carregar histórico:', err);
+        // Fallback local
+        const local = JSON.parse(localStorage.getItem('inova_agendamentos') || '[]');
+        todosOsRegistros = local.map(a => ({
+          id: a.Id ?? Date.now(),
+          especialidade: a.Especialidade ?? 'Especialidade',
+          profissional: a.Medico ?? 'Profissional',
+          status: a.Status ?? 'Pendente',
+          requerLibras: a.RequerLibras ?? false,
+          dataHora: null,
+          dia: a.Dia ?? '?', mes: (a.Mes ?? 1) - 1,
+          ano: a.Ano ?? '?', hora: a.Hora ?? '--:--',
+          prontuario: null
+        }));
+        atualizarSumario();
+        renderHistorico();
+      }
+    }
+
+    // =============================================
+    // SUMÁRIO
+    // =============================================
+    function atualizarSumario() {
+      const total = todosOsRegistros.length;
+      const compront = todosOsRegistros.filter(r => r.prontuario).length;
+      const cancelados = todosOsRegistros.filter(r => r.status === 'Cancelado').length;
+      const pendentes = todosOsRegistros.filter(r => r.status === 'Pendente').length;
+
+      document.getElementById('sum-total').textContent = total;
+      document.getElementById('sum-prontuarios').textContent = compront;
+      document.getElementById('sum-cancelados').textContent = cancelados;
+      document.getElementById('sum-pendentes').textContent = pendentes;
+    }
+
+    // =============================================
+    // FILTRO
+    // =============================================
+    function aplicarFiltro(btn) {
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      filtroAtual = btn.dataset.filter;
+      renderHistorico();
+    }
+
+    function registrosFiltrados() {
+      if (filtroAtual === 'todos') return todosOsRegistros;
+      return todosOsRegistros.filter(r => r.status === filtroAtual);
+    }
+
+    // =============================================
+    // RENDER PRINCIPAL
+    // =============================================
+    function renderHistorico() {
+      const container = document.getElementById('historico-container');
+      const lista = registrosFiltrados();
+
+      document.getElementById('filters-count').textContent =
+        lista.length === 0 ? '' : `${lista.length} registro(s)`;
+
+      if (lista.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state" role="status">
+            <i class="fa-regular fa-folder-open" aria-hidden="true"></i>
+            <h2>Nenhum registro encontrado</h2>
+            <p>${filtroAtual === 'todos'
+            ? 'Você ainda não possui consultas registradas.'
+            : `Nenhum registro com status "${filtroAtual}".`}</p>
+            </a>
+          </div>`;
+        return;
+      }
+
+      // Agrupa por mês/ano para a timeline
+      const grupos = {};
+      const ordenados = [...lista].sort((a, b) => {
+        if (a.dataHora && b.dataHora) return b.dataHora - a.dataHora;
+        return 0;
+      });
+
+      ordenados.forEach(r => {
+        const chave = `${MESES[r.mes]} de ${r.ano}`;
+        if (!grupos[chave]) grupos[chave] = [];
+        grupos[chave].push(r);
+      });
+
+      container.innerHTML = `<div class="timeline" role="list" aria-label="Linha do tempo de consultas">
+        ${Object.entries(grupos).map(([mes, items]) => `
+          <div class="timeline-group">
+            <div class="timeline-month-label" aria-label="Mês: ${mes}">${mes}</div>
+            ${items.map(r => renderCard(r)).join('')}
+          </div>
+        `).join('')}
+      </div>`;
+    }
+
+    // =============================================
+    // CARD INDIVIDUAL
+    // =============================================
+    function renderCard(r) {
+      const cancelado = r.status === 'Cancelado';
+      const finalizado = r.status === 'Finalizado';
+      const dotClass = cancelado ? 'cancelado' : r.status === 'Pendente' ? 'pendente' : '';
+
+      const statusBadgeClass = {
+        'Confirmado': 'badge-confirmado',
+        'Pendente': 'badge-pendente',
+        'Cancelado': 'badge-cancelado',
+        'Finalizado': 'badge-finalizado'
+      }[r.status] || 'badge-pendente';
+
+      const librasBadge = r.requerLibras
+        ? `<span class="badge badge-libras"><i class="fa-solid fa-hands" aria-hidden="true"></i> LIBRAS</span>` : '';
+
+      const iconFa = cancelado ? 'fa-ban' : finalizado ? 'fa-stethoscope' : 'fa-calendar-check';
+
+      const btnProntuario = r.prontuario
+        ? `<button class="btn-expand" id="btn-exp-${r.id}" onclick="toggleProntuario(${r.id})"
+              aria-expanded="false" aria-controls="pront-${r.id}">
+            <i class="fa-solid fa-chevron-down" aria-hidden="true"></i>
+            Ver Prontuário
+          </button>`
+        : (finalizado
+          ? `<div class="btn-expand" style="cursor:default; color:var(--text-muted);">
+               <i class="fa-solid fa-clock-rotate-left" aria-hidden="true"></i>
+               Prontuário não disponível ainda
+             </div>`
+          : '');
+
+      const prontContent = r.prontuario ? `
+        <div class="prontuario-area" id="pront-${r.id}" role="region" aria-label="Prontuário da consulta">
+          <div class="prontuario-inner">
+            <div class="pront-grid">
+              <div>
+                <div class="pront-title"><i class="fa-solid fa-notes-medical" aria-hidden="true"></i> Evolução Clínica</div>
+                <div class="pront-block">${escapeHtml(r.prontuario.evolucaoClinica) || '<span style="color:var(--text-muted);font-style:italic">Não informado</span>'}</div>
+              </div>
+              <div>
+                <div class="pront-title"><i class="fa-solid fa-file-prescription" aria-hidden="true"></i> Prescrição</div>
+                <div class="pront-block">${escapeHtml(r.prontuario.prescricao) || '<span style="color:var(--text-muted);font-style:italic">Sem prescrição</span>'}</div>
+              </div>
+            </div>
+          </div>
+        </div>` : '';
+
+      return `
+        <article class="timeline-item" role="listitem">
+          <div class="timeline-dot ${dotClass}" aria-hidden="true"></div>
+          <div class="consulta-card ${cancelado ? 'cancelado' : ''}">
+            <div class="card-top">
+              <div class="card-info">
+                <div class="card-icon-wrap ${cancelado ? 'cancelado' : ''}" aria-hidden="true">
+                  <i class="fa-solid ${iconFa}"></i>
+                </div>
+                <div class="card-text">
+                  <h3>${escapeHtml(r.especialidade)}</h3>
+                  <div class="meta">
+                    <span><i class="fa-solid fa-user-doctor" aria-hidden="true"></i> ${escapeHtml(r.profissional)}</span>
+                    <span><i class="fa-regular fa-clock" aria-hidden="true"></i>
+                      <time datetime="${r.dataHora ? r.dataHora.toISOString() : ''}">
+                        ${r.dia} de ${MESES[r.mes]} de ${r.ano} às ${r.hora}
+                      </time>
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <div class="card-badges">
+                <span class="badge ${statusBadgeClass}">
+                  <i class="fa-solid fa-circle" style="font-size:0.45rem;" aria-hidden="true"></i>
+                  ${r.status}
+                </span>
+                ${librasBadge}
+              </div>
+            </div>
+            ${prontContent}
+            ${btnProntuario}
+          </div>
+        </article>`;
+    }
+
+    // =============================================
+    // EXPAND PRONTUÁRIO
+    // =============================================
+    function toggleProntuario(id) {
+      const area = document.getElementById(`pront-${id}`);
+      const btn = document.getElementById(`btn-exp-${id}`);
+      if (!area || !btn) return;
+
+      const isOpen = area.classList.toggle('open');
+      btn.classList.toggle('open', isOpen);
+      btn.setAttribute('aria-expanded', String(isOpen));
+      btn.querySelector('span') && (btn.querySelector('span').textContent = isOpen ? 'Fechar Prontuário' : 'Ver Prontuário');
+    }
+
+    // =============================================
+    // UTILIDADES
+    // =============================================
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    function logout() {
+      ['inova_userName', 'inova_userId', 'inova_userRole', 'inova_userPerfil']
+        .forEach(k => localStorage.removeItem(k));
+      window.location.href = 'index.html';
+    }
+
+    function fecharA11yPanel() {
+      document.getElementById('acc-panel').classList.remove('active');
+      document.getElementById('fab-btn').setAttribute('aria-expanded', 'false');
+    }
+
+    function changeFont(delta) {
+      currentFontSize = delta === 0 ? 100 : Math.min(140, Math.max(80, currentFontSize + delta));
+      document.documentElement.style.setProperty('--font-scale', currentFontSize + '%');
+    }
+  </script>
+</body>
+
+</html>

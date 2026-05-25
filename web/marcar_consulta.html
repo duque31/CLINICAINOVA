@@ -1,0 +1,976 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>INOVA - Agendar Consulta</title>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    /* === VARIÁVEIS GLOBAIS E TEMA === */
+    :root {
+      --bg-color: #ffffff;
+      --surface-color: #f5f5f5;
+      --text-main: #171717;
+      --text-muted: #525252;
+      --primary: #0d9488;
+      --primary-hover: #0f766e;
+      --border-color: #e5e5e5;
+      --focus-ring: rgba(13, 148, 136, 0.4);
+      --font-scale: 100%;
+    }
+
+    body.high-contrast {
+      --bg-color: #121212;
+      --surface-color: #1e1e1e;
+      --text-main: #ffffff;
+      --text-muted: #a3a3a3;
+      --primary: #2dd4bf;
+      --primary-hover: #5eead4;
+      --border-color: #404040;
+      --focus-ring: rgba(45, 212, 191, 0.8);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: system-ui, -apple-system, sans-serif;
+    }
+
+    html {
+      font-size: var(--font-scale);
+      transition: font-size 0.3s ease;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      line-height: 1.5;
+      transition: background-color 0.3s, color 0.3s;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    button {
+      cursor: pointer;
+      border: none;
+      background: none;
+      font-family: inherit;
+      color: inherit;
+    }
+
+    input:focus,
+    button:focus {
+      outline: 3px solid var(--focus-ring);
+      outline-offset: 2px;
+    }
+
+    .container {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 0 24px;
+      width: 100%;
+    }
+
+    /* HEADER */
+    header {
+      border-bottom: 1px solid var(--border-color);
+      background-color: var(--bg-color);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .header-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      height: 80px;
+    }
+
+    .logo {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: var(--primary);
+      text-decoration: none;
+    }
+
+    .user-menu {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .user-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background-color: var(--primary);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* LAYOUT MULTI-STEP */
+    .scheduling-layout {
+      display: flex;
+      gap: 48px;
+      padding: 48px 0;
+      flex: 1;
+    }
+
+    .sidebar-progress {
+      width: 280px;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .step-indicator {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 32px;
+      position: relative;
+    }
+
+    .step-indicator:not(:last-child)::after {
+      content: '';
+      position: absolute;
+      left: 19px;
+      top: 40px;
+      bottom: -24px;
+      width: 2px;
+      background-color: var(--border-color);
+      transition: background-color 0.3s;
+    }
+
+    .step-indicator.completed:not(:last-child)::after {
+      background-color: var(--primary);
+    }
+
+    .step-number {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background-color: var(--surface-color);
+      border: 2px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      color: var(--text-muted);
+      z-index: 2;
+      transition: 0.3s;
+    }
+
+    .step-indicator.active .step-number,
+    .step-indicator.completed .step-number {
+      background-color: var(--primary);
+      border-color: var(--primary);
+      color: white;
+    }
+
+    .step-content {
+      padding-top: 8px;
+    }
+
+    .step-title {
+      font-weight: bold;
+      font-size: 1.125rem;
+      color: var(--text-muted);
+    }
+
+    .step-indicator.active .step-title,
+    .step-indicator.completed .step-title {
+      color: var(--text-main);
+    }
+
+    .btn-back-sidebar {
+      margin-top: auto;
+      padding-top: 32px;
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      font-weight: 600;
+      transition: color 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+    }
+
+    .btn-back-sidebar:hover {
+      color: var(--primary);
+    }
+
+    /* FORMULÁRIO PRINCIPAL */
+    .main-form-area {
+      flex: 1;
+      background-color: var(--surface-color);
+      border: 1px solid var(--border-color);
+      border-radius: 24px;
+      padding: 48px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .form-header {
+      margin-bottom: 40px;
+    }
+
+    .form-header h1 {
+      font-size: 2.5rem;
+      margin-bottom: 8px;
+    }
+
+    .form-header p {
+      color: var(--text-muted);
+      font-size: 1.125rem;
+    }
+
+    .step-view {
+      display: none;
+      animation: slideIn 0.4s ease forwards;
+    }
+
+    .step-view.active {
+      display: block;
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateX(20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    /* Componentes de Seleção */
+    .selection-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      margin-bottom: 40px;
+    }
+
+    .select-card {
+      background-color: var(--bg-color);
+      border: 2px solid var(--border-color);
+      border-radius: 16px;
+      padding: 24px;
+      text-align: center;
+      transition: 0.2s;
+      cursor: pointer;
+    }
+
+    .select-card:hover {
+      border-color: var(--primary);
+      transform: translateY(-2px);
+    }
+
+    .select-card.selected {
+      border-color: var(--primary);
+      background-color: rgba(13, 148, 136, 0.05);
+    }
+
+    .select-card i {
+      font-size: 2.5rem;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+      transition: 0.2s;
+    }
+
+    .select-card:hover i,
+    .select-card.selected i {
+      color: var(--primary);
+    }
+
+    .doctor-list {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin-bottom: 40px;
+      max-height: 400px;
+      overflow-y: auto;
+      padding-right: 8px;
+    }
+
+    .doctor-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background-color: var(--bg-color);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 24px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .doctor-card.selected {
+      border-color: var(--primary);
+      background-color: rgba(13, 148, 136, 0.05);
+    }
+
+    .doc-info {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .doc-avatar {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background-color: var(--surface-color);
+      border: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      color: var(--text-muted);
+    }
+
+    .doc-badge {
+      background-color: rgba(13, 148, 136, 0.1);
+      color: var(--primary);
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: bold;
+      margin-top: 4px;
+      display: inline-block;
+    }
+
+    /* Calendário */
+    .date-time-wrapper {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 32px;
+      margin-bottom: 40px;
+    }
+
+    .calendar-box,
+    .time-box {
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 24px;
+      background-color: var(--bg-color);
+    }
+
+    .cal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+
+    .cal-month-year {
+      font-weight: 800;
+      font-size: 1.25rem;
+      color: var(--primary);
+      text-transform: capitalize;
+    }
+
+    .cal-btn {
+      padding: 10px;
+      border-radius: 50%;
+      color: var(--text-muted);
+      transition: 0.2s;
+    }
+
+    .cal-btn:hover {
+      background-color: var(--surface-color);
+      color: var(--primary);
+    }
+
+    .cal-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 4px;
+    }
+
+    .cal-weekday {
+      text-align: center;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      padding-bottom: 12px;
+    }
+
+    .cal-day {
+      aspect-ratio: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.2s;
+      font-size: 0.9rem;
+    }
+
+    .cal-day:hover:not(.empty, .disabled) {
+      background-color: rgba(13, 148, 136, 0.1);
+      color: var(--primary);
+    }
+
+    .cal-day.selected {
+      background-color: var(--primary) !important;
+      color: white !important;
+    }
+
+    .cal-day.disabled {
+      color: var(--border-color);
+      cursor: not-allowed;
+      opacity: 0.4;
+    }
+
+    .time-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .time-slot {
+      padding: 12px;
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      font-weight: 600;
+      text-align: center;
+      transition: 0.2s;
+    }
+
+    .time-slot:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+
+    .time-slot.selected {
+      background-color: var(--primary);
+      border-color: var(--primary);
+      color: white;
+    }
+
+    .time-slot.disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+      color: var(--border-color);
+      pointer-events: none;
+    }
+
+    /* LIBRAS Box */
+    .libras-request-box {
+      background-color: rgba(13, 148, 136, 0.1);
+      border: 1px solid var(--primary);
+      border-radius: 12px;
+      padding: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 40px;
+    }
+
+    .toggle-switch {
+      width: 44px;
+      height: 24px;
+      border-radius: 12px;
+      background: var(--border-color);
+      position: relative;
+      transition: 0.3s;
+    }
+
+    .toggle-switch.active {
+      background: var(--primary);
+    }
+
+    .toggle-knob {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #fff;
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      transition: 0.3s;
+    }
+
+    .toggle-switch.active .toggle-knob {
+      transform: translateX(20px);
+    }
+
+    /* Botões e Acessibilidade */
+    .action-buttons {
+      display: flex;
+      justify-content: space-between;
+      border-top: 1px solid var(--border-color);
+      padding-top: 32px;
+    }
+
+    .btn-ghost {
+      padding: 12px 24px;
+      font-weight: 600;
+      color: var(--text-muted);
+      border-radius: 8px;
+      transition: background 0.2s;
+    }
+
+    .btn-ghost:hover {
+      background-color: var(--border-color);
+      color: var(--text-main);
+    }
+
+    .btn-solid {
+      background-color: var(--primary);
+      color: #fff;
+      padding: 12px 32px;
+      border-radius: 8px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: 0.2s;
+    }
+
+    .btn-solid:hover {
+      background-color: var(--primary-hover);
+    }
+
+    .accessibility-fab {
+      position: fixed;
+      right: 24px;
+      bottom: 24px;
+      width: 56px;
+      height: 56px;
+      background-color: var(--primary);
+      color: #fff;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      box-shadow: 0 10px 25px rgba(13, 148, 136, 0.4);
+      z-index: 100;
+    }
+
+    @media (max-width: 860px) {
+      .scheduling-layout {
+        flex-direction: column;
+        padding: 24px 0;
+      }
+
+      .sidebar-progress {
+        width: 100%;
+        overflow-x: auto;
+        padding-bottom: 16px;
+        display: block;
+      }
+
+      .btn-back-sidebar {
+        margin-top: 16px;
+        padding-top: 16px;
+        border-top: 1px solid var(--border-color);
+        display: block;
+        text-align: center;
+      }
+
+      .date-time-wrapper {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <header>
+    <div class="container header-content">
+      <a href="index.html" class="logo">INOVA</a>
+
+      <div class="user-menu">
+        <span id="user-greeting">Olá, Carregando...</span>
+        <div class="user-avatar" id="user-avatar-initial"><i class="fa-solid fa-user"></i></div>
+      </div>
+    </div>
+  </header>
+
+  <main class="container scheduling-layout">
+
+    <aside class="sidebar-progress">
+      <div class="step-indicator active" id="ind-1">
+        <div class="step-number">1</div>
+        <div class="step-content">
+          <div class="step-title">Especialidade</div>
+        </div>
+      </div>
+      <div class="step-indicator" id="ind-2">
+        <div class="step-number">2</div>
+        <div class="step-content">
+          <div class="step-title">Profissional</div>
+        </div>
+      </div>
+      <div class="step-indicator" id="ind-3">
+        <div class="step-number">3</div>
+        <div class="step-content">
+          <div class="step-title">Data & Hora</div>
+        </div>
+      </div>
+      <div class="step-indicator" id="ind-4">
+        <div class="step-number"><i class="fa-solid fa-check"></i></div>
+        <div class="step-content">
+          <div class="step-title">Confirmação</div>
+        </div>
+      </div>
+
+      <a href="index.html" class="btn-back-sidebar">
+        <i class="fa-solid fa-arrow-left"></i> Voltar para a página principal
+      </a>
+    </aside>
+
+    <section class="main-form-area">
+      <div class="step-view active" id="step-1">
+        <div class="form-header">
+          <h1>Agendar Consulta</h1>
+          <p>Selecione o serviço / especialidade médica.</p>
+        </div>
+        <div class="libras-request-box">
+          <div class="libras-request-info">
+            <h4><i class="fa-solid fa-hands"></i> Precisa de intérprete de LIBRAS?</h4>
+          </div>
+          <button id="libras-toggle" class="toggle-switch" onclick="this.classList.toggle('active')">
+            <div class="toggle-knob"></div>
+          </button>
+        </div>
+        <div class="selection-grid">
+          <button class="select-card" data-id="1" onclick="UI.select(this, '.select-card')"><i
+              class="fa-solid fa-person-walking-with-cane"></i>
+            <h3>Fisioterapia</h3>
+          </button>
+          <button class="select-card" data-id="2" onclick="UI.select(this, '.select-card')"><i
+              class="fa-solid fa-ear-listen"></i>
+            <h3>Fonoaudiologia</h3>
+          </button>
+          <button class="select-card" data-id="3" onclick="UI.select(this, '.select-card')"><i
+              class="fa-solid fa-puzzle-piece"></i>
+            <h3>Terapia Ocupacional</h3>
+          </button>
+          <button class="select-card" data-id="4" onclick="UI.select(this, '.select-card')"><i
+              class="fa-solid fa-brain"></i>
+            <h3>Psicologia</h3>
+          </button>
+        </div>
+        <div class="action-buttons">
+          <button class="btn-ghost" onclick="window.location.reload()">Cancelar Agendamento</button>
+          <button class="btn-solid" onclick="Stepper.validate(1)">Próximo Passo <i
+              class="fa-solid fa-arrow-right"></i></button>
+        </div>
+      </div>
+
+      <div class="step-view" id="step-2">
+        <div class="form-header">
+          <h1>Escolha o Profissional</h1>
+          <p>Selecione o especialista para o seu atendimento.</p>
+        </div>
+        <div class="doctor-list">
+          <div class="doctor-card" data-id="4" onclick="UI.select(this, '.doctor-card')">
+            <div class="doc-info">
+              <div class="doc-avatar"><i class="fa-solid fa-user-doctor"></i></div>
+              <div class="doc-details">
+                <h4>Dr. Roberto Mendes</h4>
+                <p>Multiespecialista</p><span class="doc-badge"><i class="fa-solid fa-hands"></i> LIBRAS</span>
+              </div>
+            </div>
+            <div class="doc-action-icon"><i class="fa-regular fa-circle"></i></div>
+          </div>
+
+          <div class="doctor-card" data-id="1" onclick="UI.select(this, '.doctor-card')">
+            <div class="doc-info">
+              <div class="doc-avatar"><i class="fa-solid fa-user-nurse"></i></div>
+              <div class="doc-details">
+                <h4>Dra. Amanda Silva</h4>
+                <p>Multiespecialista</p>
+              </div>
+            </div>
+            <div class="doc-action-icon"><i class="fa-regular fa-circle"></i></div>
+          </div>
+        </div>
+        <div class="action-buttons">
+          <button class="btn-ghost" onclick="Stepper.prev()">Voltar</button>
+          <button class="btn-solid" onclick="Stepper.validate(2)">Próximo Passo <i
+              class="fa-solid fa-arrow-right"></i></button>
+        </div>
+      </div>
+
+      <div class="step-view" id="step-3">
+        <div class="form-header">
+          <h1>Data e Hora</h1>
+          <p>Verifique a disponibilidade e selecione um horário.</p>
+        </div>
+        <div class="date-time-wrapper">
+          <div class="calendar-box">
+            <div class="cal-header">
+              <button class="cal-btn" onclick="Calendar.changeMonth(-1)"><i
+                  class="fa-solid fa-chevron-left"></i></button>
+              <span id="cal-month-year" class="cal-month-year">Janeiro 2026</span>
+              <button class="cal-btn" onclick="Calendar.changeMonth(1)"><i
+                  class="fa-solid fa-chevron-right"></i></button>
+            </div>
+            <div class="cal-grid" id="calendar-grid"></div>
+          </div>
+          <div class="time-box">
+            <h3>Horários</h3>
+            <div class="time-grid">
+              <button class="time-slot" onclick="UI.select(this, '.time-slot')">08:00</button>
+              <button class="time-slot" onclick="UI.select(this, '.time-slot')">10:00</button>
+              <button class="time-slot" onclick="UI.select(this, '.time-slot')">14:00</button>
+              <button class="time-slot" onclick="UI.select(this, '.time-slot')">16:00</button>
+            </div>
+          </div>
+        </div>
+        <div class="action-buttons">
+          <button class="btn-ghost" onclick="Stepper.prev()">Voltar</button>
+          <button id="btn-confirmar" class="btn-solid" onclick="Stepper.validate(3)">Confirmar Agendamento <i
+              class="fa-solid fa-check"></i></button>
+        </div>
+      </div>
+
+      <div class="step-view" id="step-4">
+        <div style="text-align: center; padding: 60px 0;">
+          <i class="fa-solid fa-circle-check" style="font-size: 5rem; color: var(--primary); margin-bottom: 24px;"></i>
+          <h1>Agendamento Concluído!</h1>
+          <p>Sua consulta foi registrada com sucesso no sistema.</p><br>
+          <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
+            <button class="btn-solid" onclick="window.location.href='meus_agendamentos.html'"><i
+                class="fa-solid fa-calendar-check"></i> Ver Meus Agendamentos</button>
+            <button class="btn-solid"
+              style="background: var(--surface-color); color: var(--text-main); border: 1px solid var(--border-color);"
+              onclick="window.location.href='index.html'">Voltar ao Início</button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <button id="fab-a11y" class="accessibility-fab" onclick="document.body.classList.toggle('high-contrast')"><i
+      class="fa-solid fa-universal-access"></i></button>
+
+  <script>
+    // === 4. URL DA SUA API (VERIFIQUE A PORTA NO SEU SWAGGER) ===
+    // Ensure this matches the port shown in your backend terminal
+    const API_BASE_URL = 'http://localhost:5007';
+
+    async function confirmarAgendamento(payload) {
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/agendamento`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        if (response.ok) { return { success: true }; }
+
+        const erro = await response.text();
+        alert("Erro ao agendar: " + erro);
+        return { success: false };
+      } catch (error) {
+        // Catch network errors like ERR_CONNECTION_REFUSED
+        console.error("Não foi possível conectar ao servidor:", error);
+        alert("O servidor parece estar offline. Verifique sua conexão.");
+        return { success: false };
+      }
+    }
+    // --- CALENDÁRIO DINÂMICO ---
+    const Calendar = (() => {
+      let date = new Date();
+      const months = ["janeiro", "fevereiro", "março", "abril", "maio", "junho", "julho", "agosto", "setembro", "outubro", "novembro", "dezembro"];
+      const render = () => {
+        const grid = document.getElementById('calendar-grid');
+        const label = document.getElementById('cal-month-year');
+        grid.innerHTML = "";
+        label.textContent = `${months[date.getMonth()]} ${date.getFullYear()}`;
+        ["D", "S", "T", "Q", "Q", "S", "S"].forEach(d => grid.innerHTML += `<div class="cal-weekday">${d}</div>`);
+        const firstDay = new Date(date.getFullYear(), date.getMonth(), 1).getDay();
+        const lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
+        const today = new Date(); today.setHours(0, 0, 0, 0);
+        for (let i = 0; i < firstDay; i++) grid.innerHTML += `<div class="cal-day empty"></div>`;
+        for (let day = 1; day <= lastDay; day++) {
+          const loopDate = new Date(date.getFullYear(), date.getMonth(), day);
+          let classes = "cal-day";
+          if (loopDate < today) classes += " disabled";
+          if (loopDate.toDateString() === new Date().toDateString()) classes += " today";
+          grid.innerHTML += `<div class="${classes}" onclick="UI.select(this, '.cal-day')">${day}</div>`;
+        }
+      };
+      return { init: render, changeMonth: (off) => { date.setMonth(date.getMonth() + off); render(); }, getCurrentDate: () => date };
+    })();
+
+    // --- UI CONTROLS ---
+    const UI = {
+      select: (el, group) => {
+        if (el.classList.contains('disabled') || el.classList.contains('empty')) return;
+        document.querySelectorAll(group).forEach(i => {
+          i.classList.remove('selected');
+          const icon = i.querySelector('.doc-action-icon');
+          if (icon) icon.innerHTML = '<i class="fa-regular fa-circle"></i>';
+        });
+        el.classList.add('selected');
+        const icon = el.querySelector('.doc-action-icon');
+        if (icon) icon.innerHTML = '<i class="fa-solid fa-circle-check" style="color:var(--primary)"></i>';
+
+        // Quando um dia é selecionado, atualiza disponibilidade dos horários
+        if (group === '.cal-day') atualizarHorarios();
+      }
+    };
+
+    // Desabilita horários já passados se hoje estiver selecionado
+    function atualizarHorarios() {
+      const diaSel = document.querySelector('.cal-day.selected');
+      if (!diaSel) return;
+
+      const cal = Calendar.getCurrentDate();
+      const dataSel = new Date(cal.getFullYear(), cal.getMonth(), parseInt(diaSel.innerText));
+      const hoje = new Date(); hoje.setHours(0, 0, 0, 0);
+      const ehHoje = dataSel.toDateString() === hoje.toDateString();
+      const agoraHora = new Date().getHours();
+
+      document.querySelectorAll('.time-slot').forEach(slot => {
+        slot.classList.remove('disabled', 'selected');
+        slot.disabled = false;
+        if (ehHoje) {
+          const horaSlot = parseInt(slot.textContent.split(':')[0]);
+          if (horaSlot <= agoraHora) {
+            slot.classList.add('disabled');
+            slot.classList.remove('selected');
+            slot.disabled = true;
+          }
+        }
+      });
+    }
+
+    // --- STEPPER (Lógica) ---
+    const Stepper = (() => {
+      let step = 1;
+      const update = () => {
+        document.querySelectorAll('.step-view').forEach((v, i) => v.classList.toggle('active', i + 1 === step));
+        document.querySelectorAll('.step-indicator').forEach((ind, i) => {
+          ind.classList.toggle('active', i + 1 === step);
+          ind.classList.toggle('completed', i + 1 < step);
+        });
+      };
+      return {
+        validate: async (s) => {
+          let ok = false;
+          if (s === 1) ok = !!document.querySelector('#step-1 .select-card.selected');
+          if (s === 2) ok = !!document.querySelector('#step-2 .doctor-card.selected');
+
+          if (s === 3) {
+            const diaSel = document.querySelector('.cal-day.selected');
+            const horaSel = document.querySelector('.time-slot.selected');
+
+            if (diaSel && horaSel) {
+              const especialidadeCard = document.querySelector('.select-card.selected');
+              const medicoCard = document.querySelector('.doctor-card.selected');
+
+              // Montando Data no Padrão do C# (YYYY-MM-DDTHH:MM:00)
+              const ano = Calendar.getCurrentDate().getFullYear();
+              const mes = String(Calendar.getCurrentDate().getMonth() + 1).padStart(2, '0');
+              const dia = String(diaSel.innerText).padStart(2, '0');
+              const hora = horaSel.innerText;
+              const dataISO = `${ano}-${mes}-${dia}T${hora}:00`;
+
+              // Payload mapeado com os mesmos nomes do "Agendamento.cs"
+              // PacienteId vem do localStorage (salvo no login via data.id camelCase)
+              const rawId = localStorage.getItem('inova_userId');
+              const pacienteId = (rawId && !isNaN(parseInt(rawId))) ? parseInt(rawId) : 0;
+              console.log('[DEBUG] inova_userId:', rawId, '→ pacienteId:', pacienteId);
+
+              const payload = {
+                // Utiliza a variável pacienteId extraída do localStorage na linha 896
+                PacienteId: pacienteId,
+
+                // Captura os IDs reais diretamente das seleções ativas do usuário no HTML
+                ProfissionalId: parseInt(medicoCard.getAttribute('data-id')),
+                ServicoId: parseInt(especialidadeCard.getAttribute('data-id')),
+
+                DataHora: dataISO,
+
+                // Adicionada a captura da flag RequerLibras esperada pelo seu Controller
+                RequerLibras: document.getElementById('libras-toggle').classList.contains('active'),
+
+                Status: "Pendente"
+              };
+
+              const btnConfirmar = document.getElementById('btn-confirmar');
+              btnConfirmar.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Salvando...';
+
+
+              const res = await confirmarAgendamento(payload);
+
+              if (res.success) {
+                // Guarda apenas no Front para exibir na página "Meus Agendamentos"
+                const agendamentosMocks = JSON.parse(localStorage.getItem('inova_agendamentos') || '[]');
+                agendamentosMocks.push({
+                  Id: Date.now(), Especialidade: especialidadeCard.querySelector('h3').innerText, Medico: medicoCard.querySelector('h4').innerText, Dia: diaSel.innerText, Mes: Calendar.getCurrentDate().getMonth() + 1, Ano: ano, Hora: hora, RequerLibras: document.getElementById('libras-toggle').classList.contains('active'), Status: 'Confirmado', DataAgendamento: new Date().toLocaleDateString('pt-BR')
+                });
+                localStorage.setItem('inova_agendamentos', JSON.stringify(agendamentosMocks));
+                ok = true;
+              } else {
+                btnConfirmar.innerHTML = 'Confirmar Agendamento <i class="fa-solid fa-check"></i>';
+              }
+            }
+          }
+
+          if (ok) { step++; update(); window.scrollTo(0, 0); }
+          else if (s !== 3 || (!document.querySelector('.cal-day.selected') || !document.querySelector('.time-slot.selected'))) {
+            alert("Por favor, preencha os dados necessários.");
+          }
+        },
+        prev: () => { step--; update(); window.scrollTo(0, 0); }
+      }
+    })();
+
+    document.addEventListener('DOMContentLoaded', () => {
+      Calendar.init();
+
+      // Limpa valores inválidos de sessões anteriores (ex: "undefined" de bugs antigos)
+      ['inova_userId', 'inova_userName', 'inova_userRole', 'inova_userPerfil'].forEach(key => {
+        const val = localStorage.getItem(key);
+        if (val === 'undefined' || val === 'null' || val === 'NaN') {
+          localStorage.removeItem(key);
+          console.warn(`[SESSÃO] Chave inválida removida: ${key}`);
+        }
+      });
+
+      const storedName = localStorage.getItem('inova_userName');
+      if (storedName) {
+        const firstName = storedName.split(' ')[0];
+        document.getElementById('user-greeting').textContent = `Olá, ${firstName}`;
+        document.getElementById('user-avatar-initial').innerHTML = firstName.charAt(0).toUpperCase();
+      } else {
+        window.location.href = '../cadastro/login.html'; // Proteção de Rota
+      }
+    });
+
+    function logout() {
+      localStorage.removeItem('inova_userName');
+      localStorage.removeItem('inova_userId');
+      localStorage.removeItem('inova_userRole');
+      localStorage.removeItem('inova_userPerfil');
+      window.location.href = 'index.html';
+    }
+  </script>
+</body>
+
+</html>
